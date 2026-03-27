@@ -177,6 +177,13 @@ section {
 .nav__logo img {
   height: 50px;
   width: auto;
+  border-radius: 6px;
+  padding: 4px 6px;
+  transition: background 0.4s var(--ease-out);
+}
+
+.nav.scrolled .nav__logo img {
+  background: rgba(255, 255, 255, 0.92);
 }
 
 .nav__logo-text {
@@ -498,6 +505,9 @@ section {
   overflow: hidden;
   transition: transform 0.4s var(--ease-out), border-color 0.4s var(--ease-out);
   cursor: pointer;
+  display: block;
+  text-decoration: none;
+  color: inherit;
 }
 
 .property-card:hover {
