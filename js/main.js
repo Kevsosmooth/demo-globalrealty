@@ -29,9 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Scroll reveal animations ---
-  const reveals = document.querySelectorAll('.reveal');
-  if (reveals.length) {
+  // --- Scroll reveal animations (all types) ---
+  const animatedEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .glow-line');
+  if (animatedEls.length) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -41,7 +41,25 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }, { threshold: 0.12 });
 
-    reveals.forEach(el => observer.observe(el));
+    animatedEls.forEach(el => observer.observe(el));
+  }
+
+  // --- Parallax background ---
+  const pageBg = document.querySelector('.page-bg img');
+  if (pageBg) {
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY * 0.3;
+      pageBg.style.transform = `translateY(${y}px) scale(1.1)`;
+    }, { passive: true });
+  }
+
+  // --- Parallax hero image ---
+  const heroBg = document.querySelector('.hero__bg img');
+  if (heroBg) {
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY * 0.4;
+      heroBg.style.transform = `translateY(${y}px)`;
+    }, { passive: true });
   }
 
   // --- Counter animation for stats ---
