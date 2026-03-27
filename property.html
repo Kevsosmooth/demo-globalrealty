@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2311 Grand Avenue, Bronx | Global Realty Development</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .property-breadcrumb {
+      padding: calc(var(--nav-height) + 24px) 0 16px;
+      font-size: 0.8rem;
+      color: var(--color-gray-400);
+    }
+
+    .property-breadcrumb a {
+      transition: color 0.3s;
+    }
+
+    .property-breadcrumb a:hover {
+      color: var(--color-orange);
+    }
+
+    .property-breadcrumb span {
+      margin: 0 8px;
+      opacity: 0.4;
+    }
+
+    .property-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .property-header__left h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 8px;
+    }
+
+    .property-header__address {
+      font-size: 1rem;
+      color: var(--color-gray-400);
+    }
+
+    .property-header__price {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 500;
+      color: var(--color-orange);
+      line-height: 1;
+    }
+
+    .property-header__price span {
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--color-gray-400);
+    }
+
+    .property-main {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 60px;
+      padding-bottom: 80px;
+    }
+
+    .property-description h3 {
+      margin-bottom: 20px;
+    }
+
+    .property-description p {
+      color: var(--color-gray-300);
+      font-size: 1rem;
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+
+    .property-features {
+      margin-top: 40px;
+    }
+
+    .property-features h4 {
+      margin-bottom: 20px;
+    }
+
+    .features-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .features-list__item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--color-gray-300);
+      padding: 10px 0;
+    }
+
+    .features-list__item::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--color-orange);
+      flex-shrink: 0;
+    }
+
+    .property-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .sidebar-card {
+      background: var(--color-charcoal);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 36px;
+    }
+
+    .sidebar-card h4 {
+      margin-bottom: 24px;
+    }
+
+    .sidebar-card .form__group {
+      margin-bottom: 16px;
+    }
+
+    .sidebar-agent {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .sidebar-agent__photo {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .sidebar-agent__name {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      color: var(--color-white);
+    }
+
+    .sidebar-agent__title {
+      font-size: 0.75rem;
+      color: var(--color-orange);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .similar-section {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 80px;
+    }
+
+    @media (max-width: 768px) {
+      .property-main {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .property-header {
+        flex-direction: column;
+      }
+
+      .features-list {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav scrolled">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo">
+        <img src="https://static.wixstatic.com/media/405eca_af5ad7918b5f4788b2dd4f46b4fea2c9~mv2.png/v1/fill/w_200,h_155,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/405eca_af5ad7918b5f4788b2dd4f46b4fea2c9~mv2.png" alt="Global Realty Development">
+      </a>
+      <div class="nav__links">
+        <a href="index.html">Home</a>
+        <a href="listings.html" class="active">Properties</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="contact.html" class="nav__cta">Schedule Viewing</a>
+      </div>
+      <div class="nav__toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Breadcrumb -->
+  <div class="property-breadcrumb">
+    <div class="container">
+      <a href="index.html">Home</a>
+      <span>/</span>
+      <a href="listings.html">Properties</a>
+      <span>/</span>
+      2311 Grand Avenue
+    </div>
+  </div>
+
+  <!-- Gallery -->
+  <section class="property-gallery" style="padding-top: 20px;">
+    <div class="container">
+      <div class="property-gallery__grid">
+        <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80" alt="Living area">
+        <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&q=80" alt="Kitchen">
+        <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80" alt="Bedroom">
+        <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600&q=80" alt="Bathroom">
+        <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80" alt="Details">
+      </div>
+    </div>
+  </section>
+
+  <!-- Property Header -->
+  <div class="container">
+    <div class="property-header">
+      <div class="property-header__left">
+        <span class="label" style="margin-bottom: 12px; display: inline-block;">Available Now</span>
+        <h1>2311 Grand Avenue</h1>
+        <div class="property-header__address">Bronx, New York 10468</div>
+      </div>
+      <div>
+        <div class="property-header__price">$2,604 <span>/month</span></div>
+      </div>
+    </div>
+
+    <!-- Specs -->
+    <div class="property-specs reveal">
+      <div class="property-spec">
+        <div class="property-spec__label">Bedrooms</div>
+        <div class="property-spec__value">Studio</div>
+      </div>
+      <div class="property-spec">
+        <div class="property-spec__label">Bathrooms</div>
+        <div class="property-spec__value">1</div>
+      </div>
+      <div class="property-spec">
+        <div class="property-spec__label">Square Feet</div>
+        <div class="property-spec__value">450</div>
+      </div>
+      <div class="property-spec">
+        <div class="property-spec__label">Available</div>
+        <div class="property-spec__value">Immediately</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <section style="padding-top: 40px;">
+    <div class="container">
+      <div class="property-main">
+
+        <div class="property-description reveal">
+          <h3>About This Property</h3>
+          <p>Join us for an open house at this stunning studio apartment located at 2311 Grand Avenue in the heart of the Bronx. This beautifully maintained unit features modern finishes throughout, including updated kitchen appliances and clean, contemporary design.</p>
+          <p>The apartment offers excellent natural light, a functional layout perfect for singles or couples, and is situated in a well-maintained building with responsive management. Located near public transportation, shopping, and dining options.</p>
+          <p>Prospective tenants are encouraged to bring all necessary documents for the application process, including valid government-issued photo identification, proof of income, and references.</p>
+
+          <div class="property-features">
+            <h4>Property Features</h4>
+            <div class="features-list">
+              <div class="features-list__item">Updated Kitchen</div>
+              <div class="features-list__item">Hardwood Floors</div>
+              <div class="features-list__item">Natural Light</div>
+              <div class="features-list__item">Laundry in Building</div>
+              <div class="features-list__item">Near Public Transit</div>
+              <div class="features-list__item">Pet Friendly</div>
+              <div class="features-list__item">Heat Included</div>
+              <div class="features-list__item">Water Included</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="property-sidebar reveal reveal-delay-1">
+
+          <div class="sidebar-card">
+            <div class="sidebar-agent">
+              <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=120&q=80" alt="Joseph Armato" class="sidebar-agent__photo">
+              <div>
+                <div class="sidebar-agent__name">Joseph Armato</div>
+                <div class="sidebar-agent__title">Listing Agent</div>
+              </div>
+            </div>
+
+            <h4>Schedule a Viewing</h4>
+            <form class="form">
+              <div class="form__group">
+                <input type="text" class="form__input" placeholder="Your Name">
+              </div>
+              <div class="form__group">
+                <input type="email" class="form__input" placeholder="Email Address">
+              </div>
+              <div class="form__group">
+                <input type="tel" class="form__input" placeholder="Phone Number">
+              </div>
+              <div class="form__group">
+                <textarea class="form__textarea" placeholder="I'd like to schedule a viewing for this property..." style="min-height: 100px;"></textarea>
+              </div>
+              <button type="submit" class="btn btn--primary" style="width: 100%; justify-content: center;">
+                Request Viewing
+                <span class="btn__arrow">&rarr;</span>
+              </button>
+            </form>
+          </div>
+
+          <div class="sidebar-card">
+            <h4>Quick Actions</h4>
+            <a href="tel:+17185550100" class="btn btn--dark" style="width: 100%; justify-content: center; margin-bottom: 12px;">
+              Call Agent
+            </a>
+            <a href="#" class="btn btn--outline" style="width: 100%; justify-content: center;">
+              Apply Now
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Similar Properties -->
+  <section class="similar-section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="label">You May Also Like</span>
+        <h2>Similar Properties</h2>
+      </div>
+
+      <div class="properties-grid">
+        <a href="property.html" class="property-card reveal">
+          <div class="property-card__image">
+            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&q=80" alt="3020 Valentine Ave">
+            <span class="property-card__badge">Available</span>
+          </div>
+          <div class="property-card__body">
+            <div class="property-card__price">$2,997 <span>/month</span></div>
+            <div class="property-card__address">3020 Valentine Ave, Bronx</div>
+            <div class="property-card__meta">
+              <div class="property-card__meta-item">2 Bed</div>
+              <div class="property-card__meta-item">1 Bath</div>
+            </div>
+          </div>
+        </a>
+
+        <a href="property.html" class="property-card reveal reveal-delay-1">
+          <div class="property-card__image">
+            <img src="https://images.unsplash.com/photo-1554995207-c18c203602cb?w=600&q=80" alt="2875 Briggs Ave">
+            <span class="property-card__badge">Available</span>
+          </div>
+          <div class="property-card__body">
+            <div class="property-card__price">$1,875 <span>/month</span></div>
+            <div class="property-card__address">2875 Briggs Ave, Bronx</div>
+            <div class="property-card__meta">
+              <div class="property-card__meta-item">Studio</div>
+              <div class="property-card__meta-item">1 Bath</div>
+            </div>
+          </div>
+        </a>
+
+        <a href="property.html" class="property-card reveal reveal-delay-2">
+          <div class="property-card__image">
+            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80" alt="1845 Sedgwick Ave">
+            <span class="property-card__badge">Available</span>
+          </div>
+          <div class="property-card__body">
+            <div class="property-card__price">$2,150 <span>/month</span></div>
+            <div class="property-card__address">1845 Sedgwick Ave, Bronx</div>
+            <div class="property-card__meta">
+              <div class="property-card__meta-item">1 Bed</div>
+              <div class="property-card__meta-item">1 Bath</div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a href="index.html" class="nav__logo">
+            <img src="https://static.wixstatic.com/media/405eca_af5ad7918b5f4788b2dd4f46b4fea2c9~mv2.png/v1/fill/w_200,h_155,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/405eca_af5ad7918b5f4788b2dd4f46b4fea2c9~mv2.png" alt="Global Realty Development">
+          </a>
+          <p>Premium property management and real estate development across New York City. Professional service, exceptional living.</p>
+        </div>
+        <div>
+          <div class="footer__heading">Navigation</div>
+          <div class="footer__links">
+            <a href="index.html">Home</a>
+            <a href="listings.html">Properties</a>
+            <a href="about.html">About Us</a>
+            <a href="contact.html">Contact</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer__heading">Services</div>
+          <div class="footer__links">
+            <a href="#">Property Management</a>
+            <a href="#">Tenant Placement</a>
+            <a href="#">Lease Administration</a>
+            <a href="#">Maintenance</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer__heading">Contact</div>
+          <div class="footer__links">
+            <a href="#">Bronx, New York</a>
+            <a href="mailto:admin@globalrealtydevelopment.com">admin@globalrealtydevelopment.com</a>
+            <a href="#">(718) 555-0100</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>&copy; 2026 Global Realty Development. All rights reserved.</span>
+        <span>Licensed Real Estate Broker</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

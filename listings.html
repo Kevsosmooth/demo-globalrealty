@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Properties | Global Realty Development</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .listings-hero {
+      padding: calc(var(--nav-height) + 60px) 0 60px;
+      background: var(--color-charcoal);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .listings-hero h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      margin-bottom: 12px;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 40px;
+    }
+
+    .filter-btn {
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 10px 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--color-gray-400);
+      cursor: pointer;
+      transition: all 0.3s var(--ease-out);
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      border-color: var(--color-orange);
+      color: var(--color-white);
+      background: var(--color-orange-subtle);
+    }
+
+    .listings-count {
+      font-size: 0.85rem;
+      color: var(--color-gray-400);
+      margin-bottom: 32px;
+    }
+
+    .listings-count strong {
+      color: var(--color-white);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav scrolled">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo">
+        <img src="https://static.wixstatic.com/media/405eca_af5ad7918b5f4788b2dd4f46b4fea2c9~mv2.png/v1/fill/w_200,h_155,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/405eca_af5ad7918b5f4788b2dd4f46b4fea2c9~mv2.png" alt="Global Realty Development">
+      </a>
+      <div class="nav__links">
+        <a href="index.html">Home</a>
+        <a href="listings.html" class="active">Properties</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="contact.html" class="nav__cta">Schedule Viewing</a>
+      </div>
+      <div class="nav__toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="listings-hero">
+    <div class="container">
+      <span class="label">Our Portfolio</span>
+      <h1>Properties</h1>
+      <p class="text-muted">Browse available rentals across the Bronx and greater New York City.</p>
+
+      <div class="filter-bar">
+        <button class="filter-btn active">All</button>
+        <button class="filter-btn">Studio</button>
+        <button class="filter-btn">1 Bedroom</button>
+        <button class="filter-btn">2 Bedrooms</button>
+        <button class="filter-btn">3+ Bedrooms</button>
+        <button class="filter-btn">Available</button>
+        <button class="filter-btn">Rented</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Listings -->
+  <section>
+    <div class="container">
+      <div class="listings-count reveal">Showing <strong>9</strong> properties</div>
+
+      <div class="properties-grid">
+
+        <a href="property.html" class="property-card reveal">
+          <div class="property-card__image">
+            <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80" alt="2311 Grand Avenue">
+            <span class="property-card__badge">Available</span>
+          </div>
+          <div class="property-card__body">
+            <div class="property-card__price">$2,604 <span>/month</span></div>
+            <div class="property-card__address">2311 Grand Avenue, Bronx</div>
+            <div class="property-card__meta">
+              <div class="property-card__meta-item">Studio</div>
+              <div class="property-card__meta-item">1 Bath</div>
+            </div>
+          </div>
+        </a>
+
+        <a href="property.html" class="property-card reveal reveal-delay-1">
+          <div class="property-card__image">
+            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&q=80" alt="3020 Valentine Ave">
+            <span class="property-card__badge">Available</span>
+          </div>
+          <div class="property-card__body">
+            <div class="property-card__price">$2,997 <span>/month</span></div>
+            <div class="property-card__address">3020 Valentine Ave, Bronx</div>
+            <div class="property-card__meta">
+              <div class="property-card__meta-item">2 Bed</div>
+              <div class="property-card__meta-item">1 Bath</div>
+            </div>
+          </div>
+        </a>
+
+        <a href="property.html" class="property-card reveal reveal-delay-2">
+          <div class="property-card__image">
+            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80" alt="1845 Sedgwick Ave">
+            <span class="property-card__badge">Available</span>
+          </div>
+          <div class="property-card__body">
+            <div class="property-card__price">$2,150 <span>/month</span></div>
+            <div class="property-card__address">1845 Sedgwick Ave, Bronx</div>
+            <div class="property-card__meta">
+              <div class="property-card__meta-item">1 Bed</div>
+              <div class="property-card__meta-item">1 Bath</div>
+            </div>
+          </div>
+        </a>
+
+        <a href="property.html" class="property-card reveal">
+          <div class="property-card__image">
+            <img src="https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=600&q=80" alt="450 E 149th St">
+            <span class="property-card__badge">Available</span>
+          </div>
+          <div class="property-card__body">
+            <div class="property-card__price">$3,200 <span>/month</span></div>
+            <div class="property-card__address">450 E 149th St, Bronx</div>
+            <div class="property-card__meta">
+              <div class="property-card__meta-item">3 Bed</div>
+              <div class="property-card__meta-item">2 Bath</div>
+            </div>
+          </div>
+        </a>
+
+        <a href="property.html" class="property-card reveal reveal-delay-1">
+          <div class="property-card__image">
+            <img src="https://images.unsplash.com/photo-1554995207-c18c203602cb?w=600&q=80" alt="2875 Briggs Ave">
+            <span class="property-card__badge">Available</span>
+          </div>
+          <div class="property-card__body">
+            <div class="property-card__price">$1,875 <span>/month</span></div>
+            <div class="property-card__address">2875 Briggs Ave, Bronx</div>
+            <div class="property-card__meta">
+              <div class="property-card__meta-item">Studio</div>
+              <div class="property-card__meta-item">1 Bath</div>
+            </div>
+          </div>
+        </a>
+
+        <a href="property.html" class="property-card reveal reveal-delay-2">
+          <div class="property-card__image">
+            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80" alt="1100 Grand Concourse">
+            <span class="property-card__badge">Available</span>
+          </div>
+          <div class="property-card__body">
+            <div class="property-card__price">$2,800 <span>/month</span></div>
+            <div class="property-card__address">1100 Grand Concourse, Bronx</div>
+            <div class="property-card__meta">
+              <div class="property-card__meta-item">2 Bed</div>
+              <div class="property-card__meta-item">1 Bath</div>
+            </div>
+          </div>
+        </a>
+
+        <div class="property-card reveal" style="pointer-events: none; opacity: 0.7;">
+          <div class="property-card__image">
+            <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600&q=80" alt="Rented">
+            <span class="property-card__badge property-card__badge--rented">Rented</span>
+          </div>
+          <div class="property-card__body">
+            <div class="property-card__price">$2,350 <span>/month</span></div>
+            <div class="property-card__address">1920 Jerome Ave, Bronx</div>
+            <div class="property-card__meta">
+              <div class="property-card__meta-item">1 Bed</div>
+              <div class="property-card__meta-item">1 Bath</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="property-card reveal reveal-delay-1" style="pointer-events: none; opacity: 0.7;">
+          <div class="property-card__image">
+            <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80" alt="Rented">
+            <span class="property-card__badge property-card__badge--rented">Rented</span>
+          </div>
+          <div class="property-card__body">
+            <div class="property-card__price">$3,100 <span>/month</span></div>
+            <div class="property-card__address">785 E Tremont Ave, Bronx</div>
+            <div class="property-card__meta">
+              <div class="property-card__meta-item">2 Bed</div>
+              <div class="property-card__meta-item">1 Bath</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="property-card reveal reveal-delay-2" style="pointer-events: none; opacity: 0.7;">
+          <div class="property-card__image">
+            <img src="https://images.unsplash.com/photo-1536376652096-1e4e5f26ae28?w=600&q=80" alt="Rented">
+            <span class="property-card__badge property-card__badge--rented">Rented</span>
+          </div>
+          <div class="property-card__body">
+            <div class="property-card__price">$1,950 <span>/month</span></div>
+            <div class="property-card__address">2140 Morris Ave, Bronx</div>
+            <div class="property-card__meta">
+              <div class="property-card__meta-item">Studio</div>
+              <div class="property-card__meta-item">1 Bath</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="container reveal">
+      <h2>Don't See What You're Looking For?</h2>
+      <p>New properties are added regularly. Reach out and we will notify you when something matches.</p>
+      <a href="contact.html" class="btn">
+        Get Notified
+        <span class="btn__arrow">&rarr;</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a href="index.html" class="nav__logo">
+            <img src="https://static.wixstatic.com/media/405eca_af5ad7918b5f4788b2dd4f46b4fea2c9~mv2.png/v1/fill/w_200,h_155,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/405eca_af5ad7918b5f4788b2dd4f46b4fea2c9~mv2.png" alt="Global Realty Development">
+          </a>
+          <p>Premium property management and real estate development across New York City. Professional service, exceptional living.</p>
+        </div>
+        <div>
+          <div class="footer__heading">Navigation</div>
+          <div class="footer__links">
+            <a href="index.html">Home</a>
+            <a href="listings.html">Properties</a>
+            <a href="about.html">About Us</a>
+            <a href="contact.html">Contact</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer__heading">Services</div>
+          <div class="footer__links">
+            <a href="#">Property Management</a>
+            <a href="#">Tenant Placement</a>
+            <a href="#">Lease Administration</a>
+            <a href="#">Maintenance</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer__heading">Contact</div>
+          <div class="footer__links">
+            <a href="#">Bronx, New York</a>
+            <a href="mailto:admin@globalrealtydevelopment.com">admin@globalrealtydevelopment.com</a>
+            <a href="#">(718) 555-0100</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>&copy; 2026 Global Realty Development. All rights reserved.</span>
+        <span>Licensed Real Estate Broker</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
