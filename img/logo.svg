@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 200" fill="none">
+  <!--
+    Logo: Two interlocking 3D cube/chevron shapes
+    Top cube is orange, bottom cube is dark gray
+    They interlock - the orange one sits in front on the left, gray in front on the right
+  -->
+
+  <!-- === BOTTOM CHEVRON (dark gray, drawn first so it's behind) === -->
+  <!-- Top diamond face -->
+  <path d="M120 55 L175 88 L120 121 L65 88 Z" fill="#3D3D3D"/>
+  <!-- Left face -->
+  <path d="M65 88 L120 121 L120 145 L65 112 Z" fill="#4A4A4A"/>
+  <!-- Right face -->
+  <path d="M175 88 L120 121 L120 145 L175 112 Z" fill="#2A2A2A"/>
+
+  <!-- === TOP CHEVRON (orange, drawn second so it overlaps) === -->
+  <!-- Top diamond face -->
+  <path d="M120 12 L170 42 L120 72 L70 42 Z" fill="#E87511"/>
+  <!-- Left face -->
+  <path d="M70 42 L120 72 L120 94 L70 64 Z" fill="#D06A0E"/>
+  <!-- Right face -->
+  <path d="M170 42 L120 72 L120 94 L170 64 Z" fill="#B85A0C"/>
+
+  <!-- === Interlock: orange left face overlaps gray top-left === -->
+  <path d="M65 88 L120 121 L120 94 L70 64 Z" fill="#E87511"/>
+
+  <!-- GLOBAL text -->
+  <text x="120" y="172" text-anchor="middle" font-family="'Cormorant Garamond', Georgia, serif" font-size="30" font-weight="500" letter-spacing="8" fill="#FAFAFA">GLOBAL</text>
+
+  <!-- Decorative lines flanking subtitle -->
+  <line x1="18" y1="186" x2="68" y2="186" stroke="#FAFAFA" stroke-width="0.6"/>
+  <line x1="172" y1="186" x2="222" y2="186" stroke="#FAFAFA" stroke-width="0.6"/>
+
+  <!-- REALTY DEVELOPMENT text -->
+  <text x="120" y="190" text-anchor="middle" font-family="'Outfit', Arial, sans-serif" font-size="8.5" font-weight="400" letter-spacing="4" fill="#FAFAFA">REALTY DEVELOPMENT</text>
+</svg>

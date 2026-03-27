@@ -4,13 +4,36 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // --- Navbar scroll effect ---
-  const nav = document.querySelector('.nav');
-  if (nav) {
-    window.addEventListener('scroll', () => {
-      nav.classList.toggle('scrolled', window.scrollY > 40);
-    });
+  // --- Scroll progress bar ---
+  const progressBar = document.createElement('div');
+  progressBar.className = 'scroll-progress';
+  document.body.prepend(progressBar);
+
+  // --- Floating particles ---
+  const particles = document.createElement('div');
+  particles.className = 'particles';
+  document.body.appendChild(particles);
+
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 14) + 's';
+    p.style.animationDelay = Math.random() * 10 + 's';
+    p.style.width = p.style.height = (1 + Math.random() * 2) + 'px';
+    particles.appendChild(p);
   }
+
+  // --- Navbar scroll effect + progress bar ---
+  const nav = document.querySelector('.nav');
+  window.addEventListener('scroll', () => {
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 40);
+
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? scrollTop / docHeight : 0;
+    progressBar.style.transform = `scaleX(${progress})`;
+  }, { passive: true });
 
   // --- Mobile menu toggle ---
   const toggle = document.querySelector('.nav__toggle');
@@ -44,23 +67,20 @@ document.addEventListener('DOMContentLoaded', () => {
     animatedEls.forEach(el => observer.observe(el));
   }
 
-  // --- Parallax background ---
-  const pageBg = document.querySelector('.page-bg img');
-  if (pageBg) {
-    window.addEventListener('scroll', () => {
-      const y = window.scrollY * 0.3;
-      pageBg.style.transform = `translateY(${y}px) scale(1.1)`;
-    }, { passive: true });
-  }
 
-  // --- Parallax hero image ---
-  const heroBg = document.querySelector('.hero__bg img');
-  if (heroBg) {
-    window.addEventListener('scroll', () => {
-      const y = window.scrollY * 0.4;
-      heroBg.style.transform = `translateY(${y}px)`;
-    }, { passive: true });
-  }
+  // --- Card tilt on mouse move ---
+  document.querySelectorAll('.tilt-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      card.style.transform = `perspective(800px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) translateY(-6px)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(800px) rotateY(0) rotateX(0) translateY(0)';
+    });
+  });
 
   // --- Counter animation for stats ---
   const counters = document.querySelectorAll('[data-count]');
@@ -141,5 +161,17 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.addEventListener('click', () => {
       overlay.style.display = 'none';
     });
+  }
+
+  // --- Smooth appear for hero content ---
+  const heroContent = document.querySelector('.hero__content');
+  if (heroContent) {
+    heroContent.style.opacity = '0';
+    heroContent.style.transform = 'translateY(30px)';
+    heroContent.style.transition = 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
+    setTimeout(() => {
+      heroContent.style.opacity = '1';
+      heroContent.style.transform = 'translateY(0)';
+    }, 300);
   }
 });
