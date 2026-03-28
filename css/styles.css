@@ -1413,9 +1413,11 @@ body::before {
     display: flex;
   }
 
-  /* Solid nav background when mobile menu is open */
-  html.menu-open .nav {
+  /* Solid nav background when mobile menu is open - overrides all states */
+  html.menu-open .nav,
+  html.menu-open .nav.scrolled {
     background: #0D0D0D;
+    backdrop-filter: none;
   }
 
   .nav__links a {
