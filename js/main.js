@@ -39,10 +39,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.querySelector('.nav__toggle');
   const navLinks = document.querySelector('.nav__links');
   if (toggle && navLinks) {
+    let scrollPos = 0;
     toggle.addEventListener('click', () => {
       toggle.classList.toggle('open');
       navLinks.classList.toggle('open');
-      document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
+      if (navLinks.classList.contains('open')) {
+        scrollPos = window.scrollY;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollPos}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollPos);
+      }
     });
 
     toggle.addEventListener('keydown', (e) => {
@@ -56,7 +71,12 @@ document.addEventListener('DOMContentLoaded', () => {
       link.addEventListener('click', () => {
         toggle.classList.remove('open');
         navLinks.classList.remove('open');
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
         document.body.style.overflow = '';
+        window.scrollTo(0, scrollPos);
       });
     });
   }
