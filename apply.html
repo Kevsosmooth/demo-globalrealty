@@ -2221,9 +2221,9 @@
 
     // --- Property Auto-Suggest ---
     const PROPERTIES = [
-      { address: '2311 Grand Avenue, Bronx', units: ['Studio'] },
-      { address: '3020 Valentine Ave, Bronx', units: ['Unit 2A', 'Unit 2B', 'Unit 3A'] },
-      { address: '1845 Sedgwick Ave, Bronx', units: ['Unit 1A', 'Unit 1B'] },
+      { address: '2311 Grand Avenue, Bronx' },
+      { address: '3020 Valentine Ave, Bronx' },
+      { address: '1845 Sedgwick Ave, Bronx' },
     ];
 
     function initAutoSuggest() {
@@ -2269,11 +2269,6 @@
           item.addEventListener('click', () => {
             input.value = prop.address;
             suggest.classList.remove('open');
-            /* Auto-populate unit if only one option */
-            if (prop.units.length === 1) {
-              unitInput.value = prop.units[0];
-            }
-            input.dispatchEvent(new Event('input'));
           });
           suggest.appendChild(item);
         });
