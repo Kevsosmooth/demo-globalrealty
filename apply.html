@@ -987,7 +987,7 @@
     .form-footer a:hover { color: var(--color-orange-hover); }
 
     /* --- Responsive --- */
-    /* --- Mobile Nav Toggle --- */
+    /* --- Mobile Nav Toggle (matches main site exactly) --- */
     .nav__toggle {
       display: none;
       flex-direction: column;
@@ -1019,24 +1019,32 @@
     html.menu-open,
     html.menu-open body {
       overflow: hidden;
+      touch-action: none;
+      overscroll-behavior: none;
     }
 
     @media (max-width: 768px) {
+      :root {
+        --nav-height: 70px;
+      }
+
       .nav__inner { padding: 0 20px; }
 
       .nav {
         background: rgba(13, 13, 13, 0.95);
+        backdrop-filter: none;
       }
 
       html.menu-open .nav,
       html.menu-open .nav.scrolled {
         background: #0D0D0D;
+        backdrop-filter: none;
       }
 
       .nav__links {
         display: none;
         position: fixed;
-        top: 70px;
+        top: var(--nav-height);
         left: 0;
         right: 0;
         bottom: 0;
