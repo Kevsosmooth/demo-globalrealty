@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Global Realty Development - Tenant Intake Form
+       Self-contained multi-step rental application with file uploads,
+       conditional logic, photo-to-PDF conversion, and signature pads.
+       Matches the demo site dark luxury aesthetic. -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#E87511">
+  <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+  <link rel="icon" type="image/png" href="img/logo.png">
+  <title>Apply Now | Global Realty Development</title>
+  <meta name="description" content="Submit your rental application for Global Realty Development properties in the Bronx and NYC.">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- jsPDF for client-side photo-to-PDF conversion -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- signature_pad for drawing signatures -->
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+  <style>
+    /* ============================================
+       TENANT INTAKE FORM STYLES
+       Dark luxury theme matching Global Realty demo
+       ============================================ */
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --color-orange: #E87511;
+      --color-orange-hover: #FF8C2E;
+      --color-orange-subtle: rgba(232, 117, 17, 0.12);
+      --color-orange-glow: rgba(232, 117, 17, 0.25);
+      --color-black: #0D0D0D;
+      --color-charcoal: #1A1A1A;
+      --color-dark: #242424;
+      --color-card: #1E1E1E;
+      --color-card-border: rgba(255, 255, 255, 0.08);
+      --color-gray-900: #2A2A2A;
+      --color-gray-800: #333333;
+      --color-gray-700: #666666;
+      --color-gray-400: #AAAAAA;
+      --color-gray-300: #BBBBBB;
+      --color-gray-200: #D4D4D4;
+      --color-white: #FAFAFA;
+      --color-pure-white: #FFFFFF;
+      --color-input-bg: #F7F7F7;
+      --color-input-border: #D0D0D0;
+      --color-input-focus: #FFFFFF;
+      --color-error: #E85454;
+      --color-success: #4CAF50;
+
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'Outfit', sans-serif;
+
+      --nav-height: 80px;
+      --container-width: 720px;
+      --radius: 6px;
+      --input-height: 50px;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-weight: 300;
+      color: var(--color-gray-200);
+      background-color: var(--color-black);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* --- Navigation --- */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-height);
+      z-index: 1000;
+      background: rgba(13, 13, 13, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--color-card-border);
+    }
+
+    .nav__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    .nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .nav__logo-wordmark {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--color-orange);
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+    }
+
+    .nav__logo-wordmark span {
+      display: block;
+      font-size: 0.65rem;
+      font-family: var(--font-body);
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--color-gray-300);
+      margin-top: 2px;
+    }
+
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .nav__links a {
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-gray-300);
+      transition: color 0.3s var(--ease-out);
+    }
+
+    .nav__links a:hover,
+    .nav__links a.active {
+      color: var(--color-white);
+    }
+
+    /* Apply Dropdown */
+    .nav__dropdown {
+      position: relative;
+    }
+
+    .nav__dropdown-toggle {
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-black) !important;
+      background: var(--color-orange);
+      padding: 12px 28px;
+      cursor: pointer;
+      transition: background 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav__dropdown-toggle:hover {
+      background: var(--color-orange-hover);
+      transform: translateY(-1px);
+    }
+
+    .nav__dropdown-arrow {
+      font-size: 0.6rem;
+      transition: transform 0.3s var(--ease-out);
+    }
+
+    .nav__dropdown.open .nav__dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    .nav__dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 220px;
+      background: rgba(26, 26, 26, 0.98);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px 0;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: all 0.3s var(--ease-out);
+      z-index: 1001;
+    }
+
+    .nav__dropdown.open .nav__dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .nav__dropdown-menu a {
+      display: block;
+      padding: 12px 20px;
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-gray-300) !important;
+      transition: all 0.2s ease;
+    }
+
+    .nav__dropdown-menu a:hover {
+      color: var(--color-white) !important;
+      background: rgba(232, 117, 17, 0.08);
+    }
+
+    .nav__dropdown-menu .coming-soon {
+      color: var(--color-gray-700) !important;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .nav__dropdown-menu .coming-soon span {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--color-orange);
+      margin-left: 8px;
+    }
+
+    .nav__back {
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-gray-400);
+      transition: color 0.3s var(--ease-out);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav__back:hover { color: var(--color-orange); }
+
+    /* --- Page Header --- */
+    .page-header {
+      padding: 140px 0 60px;
+      text-align: center;
+      position: relative;
+      background: linear-gradient(to bottom, rgba(232, 117, 17, 0.04) 0%, transparent 100%);
+    }
+
+    .page-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 1px;
+      background: var(--color-orange);
+    }
+
+    .page-header .label {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-orange);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .page-header .label::before,
+    .page-header .label::after {
+      content: '';
+      display: block;
+      width: 30px;
+      height: 1px;
+      background: var(--color-orange);
+      opacity: 0.5;
+    }
+
+    .page-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 400;
+      color: var(--color-white);
+      letter-spacing: -0.01em;
+      margin-bottom: 16px;
+    }
+
+    .page-header p {
+      font-size: 1rem;
+      color: var(--color-gray-400);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* --- Progress Bar --- */
+    .progress-wrap {
+      position: sticky;
+      top: var(--nav-height);
+      z-index: 100;
+      background: rgba(13, 13, 13, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-card-border);
+      padding: 20px 24px 16px;
+    }
+
+    .progress-container {
+      max-width: var(--container-width);
+      margin: 0 auto;
+    }
+
+    .progress-segments {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .progress-seg {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--color-gray-800);
+      transition: background 0.5s var(--ease-out), box-shadow 0.5s var(--ease-out);
+      cursor: pointer;
+    }
+
+    .progress-seg.completed {
+      background: var(--color-orange);
+    }
+
+    .progress-seg.active {
+      background: var(--color-orange);
+      box-shadow: 0 0 12px var(--color-orange-glow);
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .step-count {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--color-orange);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .step-name {
+      font-size: 0.7rem;
+      color: var(--color-gray-400);
+      letter-spacing: 0.06em;
+    }
+
+    /* --- Form Container --- */
+    .form-container {
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 40px 20px 100px;
+    }
+
+    /* --- Steps --- */
+    .form-step {
+      display: none;
+    }
+
+    .form-step.active {
+      display: block;
+      animation: stepIn 0.45s var(--ease-out) forwards;
+    }
+
+    .form-step.active.reverse {
+      animation: stepInReverse 0.45s var(--ease-out) forwards;
+    }
+
+    @keyframes stepIn {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes stepInReverse {
+      from { opacity: 0; transform: translateX(-40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* --- Section Cards --- */
+    .section {
+      background: var(--color-card);
+      border: 1px solid var(--color-card-border);
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      margin-bottom: 20px;
+      transition: border-color 0.3s var(--ease-out);
+    }
+
+    .section:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--color-white);
+      margin-bottom: 28px;
+      letter-spacing: 0.02em;
+      position: relative;
+      padding-bottom: 14px;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 32px;
+      height: 2px;
+      background: var(--color-orange);
+      transition: width 0.4s var(--ease-out);
+    }
+
+    .section:hover .section-title::after {
+      width: 50px;
+    }
+
+    /* --- Form Fields --- */
+    .field-group {
+      margin-bottom: 22px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .field-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--color-gray-400);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    label .req {
+      color: var(--color-orange);
+      margin-left: 2px;
+    }
+
+    .helper {
+      font-size: 0.7rem;
+      color: var(--color-gray-700);
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    /* Input fields - light backgrounds for readability */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      min-height: var(--input-height);
+      padding: 14px 16px;
+      border: 1px solid var(--color-input-border);
+      border-radius: 4px;
+      font-size: 0.95rem;
+      font-family: var(--font-body);
+      font-weight: 400;
+      color: #1A1A1A;
+      background: var(--color-input-bg);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #A0A0A0;
+    }
+
+    select {
+      color: #1A1A1A;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+    }
+
+    input:hover,
+    select:hover,
+    textarea:hover {
+      border-color: #B0B0B0;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--color-orange);
+      box-shadow: 0 0 0 3px var(--color-orange-subtle);
+      background: var(--color-input-focus);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* Error States */
+    .error-msg {
+      color: var(--color-error);
+      font-size: 0.7rem;
+      margin-top: 6px;
+      display: none;
+      letter-spacing: 0.02em;
+    }
+
+    .field-group.has-error .error-msg { display: block; }
+    .field-group.has-error input,
+    .field-group.has-error select,
+    .field-group.has-error textarea {
+      border-color: var(--color-error);
+      box-shadow: 0 0 0 3px rgba(232, 84, 84, 0.12);
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); }
+      40%, 80% { transform: translateX(4px); }
+    }
+
+    .field-group.shake { animation: shake 0.35s ease; }
+
+    .field-group.is-valid input,
+    .field-group.is-valid select {
+      border-color: var(--color-success);
+    }
+
+    /* --- Radio & Checkbox Groups --- */
+    .radio-group,
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .radio-option,
+    .checkbox-option {
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 140px;
+    }
+
+    .radio-option input,
+    .checkbox-option input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .radio-option label,
+    .checkbox-option label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 20px;
+      background: var(--color-gray-900);
+      border: 1px solid var(--color-card-border);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--color-gray-300);
+      cursor: pointer;
+      transition: all 0.25s var(--ease-out);
+      text-transform: none;
+      letter-spacing: 0.02em;
+      text-align: center;
+      min-height: var(--input-height);
+    }
+
+    .radio-option input:checked + label,
+    .checkbox-option input:checked + label {
+      background: var(--color-orange-subtle);
+      border-color: var(--color-orange);
+      color: var(--color-white);
+    }
+
+    .radio-option label:hover,
+    .checkbox-option label:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      color: var(--color-white);
+    }
+
+    /* Smaller radio options for bedroom sizes etc */
+    .radio-group--compact .radio-option {
+      min-width: 100px;
+      flex: 0 1 auto;
+    }
+
+    .radio-group--compact .radio-option label {
+      padding: 10px 16px;
+      font-size: 0.8rem;
+      min-height: 42px;
+    }
+
+    /* --- File Upload --- */
+    .file-upload {
+      position: relative;
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.3s ease, background 0.3s ease;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .file-upload:hover {
+      border-color: var(--color-orange);
+      background: rgba(232, 117, 17, 0.04);
+    }
+
+    .file-upload.has-file {
+      border-color: var(--color-success);
+      border-style: solid;
+      background: rgba(76, 175, 80, 0.04);
+    }
+
+    .file-upload input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      min-height: unset;
+      padding: 0;
+      border: none;
+    }
+
+    .file-upload__icon {
+      font-size: 1.8rem;
+      color: var(--color-gray-700);
+      margin-bottom: 8px;
+      transition: color 0.3s ease;
+    }
+
+    .file-upload:hover .file-upload__icon {
+      color: var(--color-orange);
+    }
+
+    .file-upload__text {
+      font-size: 0.85rem;
+      color: var(--color-gray-400);
+    }
+
+    .file-upload__text strong {
+      color: var(--color-orange);
+      font-weight: 500;
+    }
+
+    .file-upload__hint {
+      font-size: 0.7rem;
+      color: var(--color-gray-700);
+      margin-top: 6px;
+    }
+
+    .file-upload__name {
+      font-size: 0.8rem;
+      color: var(--color-success);
+      margin-top: 8px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .file-upload.has-file .file-upload__name {
+      display: block;
+    }
+
+    .file-upload.has-file .file-upload__icon {
+      color: var(--color-success);
+    }
+
+    .file-upload__warning {
+      font-size: 0.7rem;
+      color: var(--color-orange);
+      margin-top: 4px;
+      display: none;
+    }
+
+    /* --- Signature Pad --- */
+    .sig-label {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .sig-label label { margin-bottom: 0; }
+
+    .sig-hint {
+      font-size: 0.7rem;
+      color: var(--color-gray-700);
+      font-style: italic;
+    }
+
+    .signature-pad-wrapper {
+      position: relative;
+      background: var(--color-input-bg);
+      border: 1px solid var(--color-input-border);
+      border-radius: 4px;
+      height: 140px;
+      overflow: hidden;
+    }
+
+    .signature-pad-wrapper canvas {
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+
+    .sig-placeholder {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.85rem;
+      color: #C0C0C0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .signature-pad-wrapper.has-sig .sig-placeholder {
+      opacity: 0;
+    }
+
+    .sig-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .sig-btn {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-gray-400);
+      background: var(--color-gray-900);
+      border: 1px solid var(--color-card-border);
+      padding: 6px 14px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .sig-btn:hover {
+      color: var(--color-white);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* --- Disclosure Text --- */
+    .disclosure-text {
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--color-gray-300);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--color-card-border);
+      border-radius: 4px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+
+    .acknowledgement-text {
+      font-size: 0.75rem;
+      line-height: 1.6;
+      color: var(--color-orange);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 24px;
+    }
+
+    /* --- Navigation Buttons --- */
+    .form-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid var(--color-card-border);
+    }
+
+    .btn-prev,
+    .btn-next,
+    .btn-submit {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 16px 36px;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.35s var(--ease-out);
+      border: none;
+    }
+
+    .btn-next,
+    .btn-submit {
+      background: var(--color-orange);
+      color: var(--color-black);
+    }
+
+    .btn-next:hover,
+    .btn-submit:hover {
+      background: var(--color-orange-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px var(--color-orange-glow);
+    }
+
+    .btn-prev {
+      background: transparent;
+      color: var(--color-gray-400);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-prev:hover {
+      color: var(--color-white);
+      border-color: var(--color-orange);
+    }
+
+    .btn-submit {
+      padding: 18px 48px;
+    }
+
+    .btn-arrow {
+      transition: transform 0.3s var(--ease-out);
+      font-size: 1rem;
+    }
+
+    .btn-next:hover .btn-arrow { transform: translateX(4px); }
+    .btn-prev:hover .btn-arrow { transform: translateX(-4px); }
+
+    /* --- Conditional Fields --- */
+    .conditional {
+      display: none;
+      overflow: hidden;
+    }
+
+    .conditional.visible {
+      display: block;
+      animation: fadeInDown 0.35s var(--ease-out) forwards;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- Occupant Row --- */
+    .occupant-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--color-card-border);
+    }
+
+    .occupant-row:last-child { border-bottom: none; }
+
+    .occupant-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--color-orange);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    /* --- Success Screen --- */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    .success-screen.visible { display: block; }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--color-orange-subtle);
+      border: 2px solid var(--color-orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 32px;
+      font-size: 2rem;
+    }
+
+    .success-screen h2 {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      color: var(--color-white);
+      margin-bottom: 16px;
+    }
+
+    .success-screen p {
+      color: var(--color-gray-400);
+      max-width: 480px;
+      margin: 0 auto 40px;
+    }
+
+    .success-screen .btn-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 16px 36px;
+      background: var(--color-orange);
+      color: var(--color-black);
+      border: none;
+      cursor: pointer;
+      transition: all 0.35s var(--ease-out);
+    }
+
+    .success-screen .btn-home:hover {
+      background: var(--color-orange-hover);
+      transform: translateY(-2px);
+    }
+
+    /* --- Footer --- */
+    .form-footer {
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid var(--color-card-border);
+      font-size: 0.75rem;
+      color: var(--color-gray-700);
+      letter-spacing: 0.04em;
+    }
+
+    .form-footer a {
+      color: var(--color-orange);
+      transition: color 0.2s ease;
+    }
+
+    .form-footer a:hover { color: var(--color-orange-hover); }
+
+    /* --- Responsive --- */
+    @media (max-width: 640px) {
+      .nav__inner { padding: 0 20px; }
+      .nav__links { display: none; }
+
+      .page-header { padding: 120px 20px 48px; }
+      .page-header h1 { font-size: 2rem; }
+
+      .progress-wrap { padding: 16px 16px 12px; }
+
+      .form-container { padding: 24px 16px 80px; }
+
+      .section { padding: 28px 20px; }
+
+      .field-row,
+      .field-row-3,
+      .occupant-row {
+        grid-template-columns: 1fr;
+      }
+
+      .radio-option,
+      .checkbox-option {
+        min-width: 100%;
+      }
+
+      .form-nav { flex-direction: column-reverse; gap: 12px; }
+      .btn-prev, .btn-next, .btn-submit { width: 100%; justify-content: center; }
+
+      .signature-pad-wrapper { height: 120px; }
+    }
+
+    /* --- Loading State --- */
+    .btn-submit.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .btn-submit.loading::after {
+      content: '';
+      width: 16px;
+      height: 16px;
+      border: 2px solid transparent;
+      border-top-color: var(--color-black);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-left: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* --- Glow Line (from demo) --- */
+    .glow-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--color-orange), transparent);
+      opacity: 0.3;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">
+        <span class="nav__logo-wordmark">Global <span>Realty Development</span></span>
+      </a>
+      <div class="nav__links">
+        <a href="index.html">Home</a>
+        <a href="listings.html">Properties</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <div class="nav__dropdown">
+          <a class="nav__dropdown-toggle" role="button" tabindex="0">Apply <span class="nav__dropdown-arrow">&#9660;</span></a>
+          <div class="nav__dropdown-menu">
+            <a href="apply.html">Tenant Application</a>
+            <a class="coming-soon">Landlord Application <span>Coming Soon</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="label">Rental Application</div>
+    <h1>Apply Now</h1>
+    <p>Complete the form below to submit your rental application. All fields marked with an asterisk are required.</p>
+  </header>
+
+  <div class="glow-line"></div>
+
+  <!-- Progress Bar -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-container">
+      <div class="progress-segments">
+        <div class="progress-seg active" data-step="0"></div>
+        <div class="progress-seg" data-step="1"></div>
+        <div class="progress-seg" data-step="2"></div>
+        <div class="progress-seg" data-step="3"></div>
+        <div class="progress-seg" data-step="4"></div>
+      </div>
+      <div class="progress-info">
+        <span class="step-count" id="stepCount">Step 1 of 5</span>
+        <span class="step-name" id="stepName">Contact Information</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form id="tenantForm" novalidate>
+    <div class="form-container">
+
+      <!-- ==================== STEP 1: Contact Information ==================== -->
+      <div class="form-step active" data-step="0">
+        <div class="section">
+          <div class="section-title">Contact Information</div>
+
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="firstName">First Name <span class="req">*</span></label>
+              <input type="text" id="firstName" name="firstName" required placeholder="First name">
+              <div class="error-msg">First name is required</div>
+            </div>
+            <div class="field-group">
+              <label for="lastName">Last Name <span class="req">*</span></label>
+              <input type="text" id="lastName" name="lastName" required placeholder="Last name">
+              <div class="error-msg">Last name is required</div>
+            </div>
+          </div>
+
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="cellPhone">Cell Phone <span class="req">*</span></label>
+              <input type="tel" id="cellPhone" name="cellPhone" required placeholder="(555) 555-5555">
+              <div class="error-msg">Phone number is required</div>
+            </div>
+            <div class="field-group">
+              <label for="email">Email <span class="req">*</span></label>
+              <input type="email" id="email" name="email" required placeholder="you@email.com">
+              <div class="error-msg">Valid email is required</div>
+            </div>
+          </div>
+
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="applyAddress">Address Applying To <span class="req">*</span></label>
+              <input type="text" id="applyAddress" name="applyAddress" required placeholder="Street address">
+              <div class="error-msg">Address is required</div>
+            </div>
+            <div class="field-group">
+              <label for="applyUnit">Unit Number <span class="req">*</span></label>
+              <input type="text" id="applyUnit" name="applyUnit" required placeholder="Unit #">
+              <div class="error-msg">Unit number is required</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Current Address</div>
+
+          <div class="field-group">
+            <label for="currentStreet">Street Address <span class="req">*</span></label>
+            <input type="text" id="currentStreet" name="currentStreet" required placeholder="Street address">
+            <div class="error-msg">Street address is required</div>
+          </div>
+
+          <div class="field-group">
+            <label for="currentStreet2">Street Address Line 2</label>
+            <input type="text" id="currentStreet2" name="currentStreet2" placeholder="Apt, suite, floor (optional)">
+          </div>
+
+          <div class="field-row-3 field-group">
+            <div class="field-group">
+              <label for="currentCity">City <span class="req">*</span></label>
+              <input type="text" id="currentCity" name="currentCity" required placeholder="City">
+              <div class="error-msg">City is required</div>
+            </div>
+            <div class="field-group">
+              <label for="currentState">State <span class="req">*</span></label>
+              <select id="currentState" name="currentState" required>
+                <option value="">Select</option>
+                <option value="NY">New York</option>
+                <option value="NJ">New Jersey</option>
+                <option value="CT">Connecticut</option>
+                <option value="PA">Pennsylvania</option>
+                <option value="AL">Alabama</option>
+                <option value="AK">Alaska</option>
+                <option value="AZ">Arizona</option>
+                <option value="AR">Arkansas</option>
+                <option value="CA">California</option>
+                <option value="CO">Colorado</option>
+                <option value="DE">Delaware</option>
+                <option value="FL">Florida</option>
+                <option value="GA">Georgia</option>
+                <option value="HI">Hawaii</option>
+                <option value="ID">Idaho</option>
+                <option value="IL">Illinois</option>
+                <option value="IN">Indiana</option>
+                <option value="IA">Iowa</option>
+                <option value="KS">Kansas</option>
+                <option value="KY">Kentucky</option>
+                <option value="LA">Louisiana</option>
+                <option value="ME">Maine</option>
+                <option value="MD">Maryland</option>
+                <option value="MA">Massachusetts</option>
+                <option value="MI">Michigan</option>
+                <option value="MN">Minnesota</option>
+                <option value="MS">Mississippi</option>
+                <option value="MO">Missouri</option>
+                <option value="MT">Montana</option>
+                <option value="NE">Nebraska</option>
+                <option value="NV">Nevada</option>
+                <option value="NH">New Hampshire</option>
+                <option value="NM">New Mexico</option>
+                <option value="NC">North Carolina</option>
+                <option value="ND">North Dakota</option>
+                <option value="OH">Ohio</option>
+                <option value="OK">Oklahoma</option>
+                <option value="OR">Oregon</option>
+                <option value="RI">Rhode Island</option>
+                <option value="SC">South Carolina</option>
+                <option value="SD">South Dakota</option>
+                <option value="TN">Tennessee</option>
+                <option value="TX">Texas</option>
+                <option value="UT">Utah</option>
+                <option value="VT">Vermont</option>
+                <option value="VA">Virginia</option>
+                <option value="WA">Washington</option>
+                <option value="WV">West Virginia</option>
+                <option value="WI">Wisconsin</option>
+                <option value="WY">Wyoming</option>
+                <option value="DC">Washington DC</option>
+              </select>
+              <div class="error-msg">State is required</div>
+            </div>
+            <div class="field-group">
+              <label for="currentZip">Zip Code <span class="req">*</span></label>
+              <input type="text" id="currentZip" name="currentZip" required placeholder="Zip" maxlength="10">
+              <div class="error-msg">Zip code is required</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Viewing</div>
+          <div class="field-group">
+            <label>Did you view the apartment? <span class="req">*</span></label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="viewedYes" name="viewedApartment" value="Yes" required>
+                <label for="viewedYes">Yes</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="viewedNo" name="viewedApartment" value="No">
+                <label for="viewedNo">No</label>
+              </div>
+            </div>
+            <div class="error-msg">Please select an option</div>
+          </div>
+        </div>
+
+        <div class="form-nav">
+          <div></div>
+          <button type="button" class="btn-next" onclick="nextStep()">
+            Continue <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== STEP 2: Screening Questions ==================== -->
+      <div class="form-step" data-step="1">
+        <div class="section">
+          <div class="section-title">Rental Assistance</div>
+
+          <div class="field-group">
+            <label>Do you have a rental assistance program? <span class="req">*</span></label>
+            <p class="helper" style="margin-bottom:10px; margin-top:0;">Section 8, City FHEPS, HASA, etc.</p>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="assistYes" name="hasAssistance" value="Yes" required data-toggle="assistanceDetails">
+                <label for="assistYes">Yes</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="assistNo" name="hasAssistance" value="No" data-toggle="assistanceDetails" data-hide="true">
+                <label for="assistNo">No</label>
+              </div>
+            </div>
+            <div class="error-msg">Please select an option</div>
+          </div>
+
+          <div class="conditional" id="assistanceDetails">
+            <div class="field-group">
+              <label>Which program do you have? <span class="req">*</span></label>
+              <div class="radio-group">
+                <div class="radio-option">
+                  <input type="radio" id="progNYCHA" name="assistProgram" value="NYCHA (Section 8)">
+                  <label for="progNYCHA">NYCHA (Section 8)</label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" id="progHPD" name="assistProgram" value="HPD (Section 8)">
+                  <label for="progHPD">HPD (Section 8)</label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" id="progHCV" name="assistProgram" value="HCV (Section 8)">
+                  <label for="progHCV">HCV (Section 8)</label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" id="progCVR" name="assistProgram" value="CVR (Section 8)">
+                  <label for="progCVR">CVR (Section 8)</label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" id="progHASA" name="assistProgram" value="HASA">
+                  <label for="progHASA">HASA</label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" id="progFHEPS" name="assistProgram" value="CityFHEPS/FHEPS/Share Program">
+                  <label for="progFHEPS">CityFHEPS / FHEPS / Share</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label>How many bedrooms is your voucher for? <span class="req">*</span></label>
+              <div class="radio-group radio-group--compact">
+                <div class="radio-option">
+                  <input type="radio" id="bedStudio" name="voucherBedrooms" value="Studio">
+                  <label for="bedStudio">Studio</label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" id="bed1" name="voucherBedrooms" value="1 Bedroom">
+                  <label for="bed1">1 Bed</label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" id="bed2" name="voucherBedrooms" value="2 Bedroom">
+                  <label for="bed2">2 Bed</label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" id="bed3" name="voucherBedrooms" value="3 Bedroom">
+                  <label for="bed3">3 Bed</label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" id="bed4" name="voucherBedrooms" value="4 Bedroom">
+                  <label for="bed4">4 Bed</label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" id="bed5" name="voucherBedrooms" value="5 Bedroom">
+                  <label for="bed5">5 Bed</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Background</div>
+
+          <div class="field-group">
+            <label>Are you coming from a shelter? <span class="req">*</span></label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="shelterYes" name="fromShelter" value="Yes" required>
+                <label for="shelterYes">Yes</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="shelterNo" name="fromShelter" value="No">
+                <label for="shelterNo">No</label>
+              </div>
+            </div>
+            <div class="error-msg">Please select an option</div>
+          </div>
+
+          <div class="field-group">
+            <label>Is your cash assistance case active? <span class="req">*</span></label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="cashYes" name="cashAssistActive" value="Yes" required>
+                <label for="cashYes">Yes</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="cashNo" name="cashAssistActive" value="No">
+                <label for="cashNo">No</label>
+              </div>
+            </div>
+            <div class="error-msg">Please select an option</div>
+          </div>
+
+          <div class="field-group">
+            <label>What would you say your credit score would rank? <span class="req">*</span></label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="creditNone" name="creditScore" value="No Credit History" required>
+                <label for="creditNone">No Credit History</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="creditVPoor" name="creditScore" value="Very Poor (300-579)">
+                <label for="creditVPoor">Very Poor (300-579)</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="creditPoor" name="creditScore" value="Poor (580-669)">
+                <label for="creditPoor">Poor (580-669)</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="creditFair" name="creditScore" value="Fair (670-739)">
+                <label for="creditFair">Fair (670-739)</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="creditGood" name="creditScore" value="Good (740-799)">
+                <label for="creditGood">Good (740-799)</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="creditVGood" name="creditScore" value="Very Good (800+)">
+                <label for="creditVGood">Very Good (800+)</label>
+              </div>
+            </div>
+            <div class="error-msg">Please select an option</div>
+          </div>
+        </div>
+
+        <div class="form-nav">
+          <button type="button" class="btn-prev" onclick="prevStep()">
+            <span class="btn-arrow">&larr;</span> Back
+          </button>
+          <button type="button" class="btn-next" onclick="nextStep()">
+            Continue <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== STEP 3: Occupants & Employment ==================== -->
+      <div class="form-step" data-step="2">
+        <div class="section">
+          <div class="section-title">Additional Occupants</div>
+
+          <div class="field-group">
+            <label>Are there any other occupants that will be living with you? <span class="req">*</span></label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="occYes" name="hasOccupants" value="Yes" required data-toggle="occupantDetails">
+                <label for="occYes">Yes</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="occNo" name="hasOccupants" value="No" data-toggle="occupantDetails" data-hide="true">
+                <label for="occNo">No</label>
+              </div>
+            </div>
+            <div class="error-msg">Please select an option</div>
+          </div>
+
+          <div class="conditional" id="occupantDetails">
+            <div class="field-group">
+              <label>How many additional people? <span class="req">*</span></label>
+              <div class="radio-group radio-group--compact">
+                <div class="radio-option"><input type="radio" id="occ1" name="occupantCount" value="1"><label for="occ1">1</label></div>
+                <div class="radio-option"><input type="radio" id="occ2" name="occupantCount" value="2"><label for="occ2">2</label></div>
+                <div class="radio-option"><input type="radio" id="occ3" name="occupantCount" value="3"><label for="occ3">3</label></div>
+                <div class="radio-option"><input type="radio" id="occ4" name="occupantCount" value="4"><label for="occ4">4</label></div>
+                <div class="radio-option"><input type="radio" id="occ5" name="occupantCount" value="5"><label for="occ5">5</label></div>
+                <div class="radio-option"><input type="radio" id="occ6" name="occupantCount" value="6"><label for="occ6">6</label></div>
+                <div class="radio-option"><input type="radio" id="occ7" name="occupantCount" value="7+"><label for="occ7">7+</label></div>
+              </div>
+            </div>
+
+            <div id="occupantFields"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Employment History</div>
+
+          <div class="field-group">
+            <label>Do you currently work? <span class="req">*</span></label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="workYes" name="currentlyWorking" value="Yes" required>
+                <label for="workYes">Yes</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="workNo" name="currentlyWorking" value="No">
+                <label for="workNo">No</label>
+              </div>
+            </div>
+            <div class="error-msg">Please select an option</div>
+          </div>
+
+          <div class="field-group">
+            <label>Are you a veteran? <span class="req">*</span></label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="vetYes" name="isVeteran" value="Yes" required>
+                <label for="vetYes">Yes</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="vetNo" name="isVeteran" value="No">
+                <label for="vetNo">No</label>
+              </div>
+            </div>
+            <div class="error-msg">Please select an option</div>
+          </div>
+
+          <div class="field-group">
+            <label>Did you file a tax return last year? <span class="req">*</span></label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="taxYes" name="filedTaxes" value="Yes" required>
+                <label for="taxYes">Yes</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="taxNo" name="filedTaxes" value="No">
+                <label for="taxNo">No</label>
+              </div>
+            </div>
+            <div class="error-msg">Please select an option</div>
+          </div>
+        </div>
+
+        <div class="form-nav">
+          <button type="button" class="btn-prev" onclick="prevStep()">
+            <span class="btn-arrow">&larr;</span> Back
+          </button>
+          <button type="button" class="btn-next" onclick="nextStep()">
+            Continue <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== STEP 4: Income, Documents & References ==================== -->
+      <div class="form-step" data-step="3">
+        <div class="section">
+          <div class="section-title">Other Sources of Income</div>
+          <p class="helper" style="margin-bottom: 20px; margin-top: -12px;">If you currently receive money from the state, select what applies. If none, select N/A.</p>
+
+          <div class="field-group">
+            <label>Select all that apply <span class="req">*</span></label>
+            <div class="checkbox-group">
+              <div class="checkbox-option">
+                <input type="checkbox" id="incCash" name="incomeSources" value="Cash Assistance" data-toggle="cashUpload">
+                <label for="incCash">Cash Assistance</label>
+              </div>
+              <div class="checkbox-option">
+                <input type="checkbox" id="incSSI" name="incomeSources" value="SSI" data-toggle="ssiUpload">
+                <label for="incSSI">SSI</label>
+              </div>
+              <div class="checkbox-option">
+                <input type="checkbox" id="incFood" name="incomeSources" value="Food Stamps">
+                <label for="incFood">Food Stamps</label>
+              </div>
+              <div class="checkbox-option">
+                <input type="checkbox" id="incOther" name="incomeSources" value="Other" data-toggle="otherIncomeDetails">
+                <label for="incOther">Other</label>
+              </div>
+              <div class="checkbox-option">
+                <input type="checkbox" id="incNA" name="incomeSources" value="N/A" data-exclusive="true">
+                <label for="incNA">N/A</label>
+              </div>
+            </div>
+            <div class="error-msg">Please select at least one option</div>
+          </div>
+
+          <div class="conditional" id="cashUpload">
+            <div class="field-group">
+              <label>Cash Assistance Budget Letter <span class="req">*</span></label>
+              <p class="helper" style="margin-top:-4px; margin-bottom:10px;">Failure to upload will result in an incomplete application.</p>
+              <div class="file-upload" data-upload="cashAssistLetter">
+                <input type="file" name="cashAssistLetter" accept=".pdf,.jpg,.jpeg,.png">
+                <div class="file-upload__icon">&#8682;</div>
+                <div class="file-upload__text">Drag files here or <strong>browse</strong></div>
+                <div class="file-upload__hint">PDF, JPG, or PNG. Photos will be converted to PDF.</div>
+                <div class="file-upload__name"></div>
+                <div class="file-upload__warning">Photo will be converted to PDF</div>
+              </div>
+              <div class="error-msg">This document is required</div>
+            </div>
+          </div>
+
+          <div class="conditional" id="ssiUpload">
+            <div class="field-group">
+              <label>SSI Award Letter <span class="req">*</span></label>
+              <p class="helper" style="margin-top:-4px; margin-bottom:10px;">Failure to upload will result in an incomplete application.</p>
+              <div class="file-upload" data-upload="ssiAwardLetter">
+                <input type="file" name="ssiAwardLetter" accept=".pdf,.jpg,.jpeg,.png">
+                <div class="file-upload__icon">&#8682;</div>
+                <div class="file-upload__text">Drag files here or <strong>browse</strong></div>
+                <div class="file-upload__hint">PDF, JPG, or PNG. Photos will be converted to PDF.</div>
+                <div class="file-upload__name"></div>
+                <div class="file-upload__warning">Photo will be converted to PDF</div>
+              </div>
+              <div class="error-msg">This document is required</div>
+            </div>
+          </div>
+
+          <div class="conditional" id="otherIncomeDetails">
+            <div class="field-group">
+              <label for="otherIncomeSource">Specify the other source of income <span class="req">*</span></label>
+              <input type="text" id="otherIncomeSource" name="otherIncomeSource" placeholder="e.g., Disability, Pension, Alimony">
+              <div class="error-msg">Please specify the income source</div>
+            </div>
+            <div class="field-group">
+              <label>Supporting Document</label>
+              <div class="file-upload" data-upload="otherIncomeLetter">
+                <input type="file" name="otherIncomeLetter" accept=".pdf,.jpg,.jpeg,.png">
+                <div class="file-upload__icon">&#8682;</div>
+                <div class="file-upload__text">Drag files here or <strong>browse</strong></div>
+                <div class="file-upload__hint">PDF, JPG, or PNG. Photos will be converted to PDF.</div>
+                <div class="file-upload__name"></div>
+                <div class="file-upload__warning">Photo will be converted to PDF</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Housing Specialist Contact</div>
+
+          <div class="field-row-3 field-group">
+            <div class="field-group">
+              <label for="hsName">Name <span class="req">*</span></label>
+              <input type="text" id="hsName" name="housingSpecName" required placeholder="Full name">
+              <div class="error-msg">Name is required</div>
+            </div>
+            <div class="field-group">
+              <label for="hsPhone">Phone <span class="req">*</span></label>
+              <input type="tel" id="hsPhone" name="housingSpecPhone" required placeholder="(555) 555-5555">
+              <div class="error-msg">Phone is required</div>
+            </div>
+            <div class="field-group">
+              <label for="hsEmail">Email <span class="req">*</span></label>
+              <input type="email" id="hsEmail" name="housingSpecEmail" required placeholder="email@example.com">
+              <div class="error-msg">Email is required</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Current Landlord Information</div>
+
+          <div class="field-row-3 field-group">
+            <div class="field-group">
+              <label for="llName">Landlord Name <span class="req">*</span></label>
+              <input type="text" id="llName" name="landlordName" required placeholder="Full name">
+              <p class="helper">If in shelter, type "SHELTER"</p>
+              <div class="error-msg">Name is required</div>
+            </div>
+            <div class="field-group">
+              <label for="llPhone">Landlord Phone <span class="req">*</span></label>
+              <input type="tel" id="llPhone" name="landlordPhone" required placeholder="(555) 555-5555">
+              <p class="helper">If in shelter, type "SHELTER"</p>
+              <div class="error-msg">Phone is required</div>
+            </div>
+            <div class="field-group">
+              <label for="llEmail">Landlord Email <span class="req">*</span></label>
+              <input type="email" id="llEmail" name="landlordEmail" required placeholder="email@example.com">
+              <p class="helper">If in shelter, type "SHELTER"</p>
+              <div class="error-msg">Email is required</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-nav">
+          <button type="button" class="btn-prev" onclick="prevStep()">
+            <span class="btn-arrow">&larr;</span> Back
+          </button>
+          <button type="button" class="btn-next" onclick="nextStep()">
+            Continue <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== STEP 5: Authorization & Signatures ==================== -->
+      <div class="form-step" data-step="4">
+        <div class="section">
+          <div class="section-title">Disclosure #1</div>
+          <div class="disclosure-text">I agree that all of the information provided in this application is true, accurate, complete, and correct as of today's date. I agree that any information determined to be intentionally false or omitted will be grounds for disapproval of my application or termination of the lease. I understand and agree that this application does not guarantee that I will be offered the property, and I authorize the owner to verify the information provided. I agree to follow the rules for acceptable use including no smoking, no pets, and no subletting.</div>
+          <div class="field-group">
+            <div class="sig-label">
+              <label>Signature <span class="req">*</span></label>
+              <span class="sig-hint">Draw your signature below</span>
+            </div>
+            <div class="signature-pad-wrapper" id="sigWrap1">
+              <canvas id="sig1"></canvas>
+              <div class="sig-placeholder">Sign here</div>
+            </div>
+            <div class="sig-actions">
+              <button type="button" class="sig-btn" data-action="undo" data-pad="sig1">Undo</button>
+              <button type="button" class="sig-btn" data-action="clear" data-pad="sig1">Clear</button>
+            </div>
+            <input type="hidden" name="signature1" id="sig1Data">
+            <div class="error-msg">Signature is required</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Disclosure #2</div>
+          <div class="disclosure-text">In connection with my tenant application with you, I understand that consumer reports which may contain public record information may be requested to evaluate my rental application. These reports may include the following types of information: names and dates of previous employers, public records, credit data, bankruptcy proceedings, eviction and criminal records, etc., from federal, state and other agencies which maintain such records. I hereby authorize procurement of consumer report(s). If approved as a tenant, this authorization shall remain on file and shall serve as ongoing authorization for you to procure consumer reports at any time during my contract period.</div>
+          <div class="field-group">
+            <div class="sig-label">
+              <label>Signature <span class="req">*</span></label>
+              <span class="sig-hint">Draw your signature below</span>
+            </div>
+            <div class="signature-pad-wrapper" id="sigWrap2">
+              <canvas id="sig2"></canvas>
+              <div class="sig-placeholder">Sign here</div>
+            </div>
+            <div class="sig-actions">
+              <button type="button" class="sig-btn" data-action="undo" data-pad="sig2">Undo</button>
+              <button type="button" class="sig-btn" data-action="clear" data-pad="sig2">Clear</button>
+            </div>
+            <input type="hidden" name="signature2" id="sig2Data">
+            <div class="error-msg">Signature is required</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Tenant Acknowledgement</div>
+          <div class="acknowledgement-text">This application does not guarantee you the apartment. By signing this document you acknowledge that you will be considered for the apartment but you are not guaranteed to get it.</div>
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="sigFirstName">First Name <span class="req">*</span></label>
+              <input type="text" id="sigFirstName" name="sigFirstName" required placeholder="First name">
+              <div class="error-msg">First name is required</div>
+            </div>
+            <div class="field-group">
+              <label for="sigLastName">Last Name <span class="req">*</span></label>
+              <input type="text" id="sigLastName" name="sigLastName" required placeholder="Last name">
+              <div class="error-msg">Last name is required</div>
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="sig-label">
+              <label>Signature <span class="req">*</span></label>
+              <span class="sig-hint">Draw your signature below</span>
+            </div>
+            <div class="signature-pad-wrapper" id="sigWrap3">
+              <canvas id="sig3"></canvas>
+              <div class="sig-placeholder">Sign here</div>
+            </div>
+            <div class="sig-actions">
+              <button type="button" class="sig-btn" data-action="undo" data-pad="sig3">Undo</button>
+              <button type="button" class="sig-btn" data-action="clear" data-pad="sig3">Clear</button>
+            </div>
+            <input type="hidden" name="signature3" id="sig3Data">
+            <div class="error-msg">Signature is required</div>
+          </div>
+        </div>
+
+        <div class="form-nav">
+          <button type="button" class="btn-prev" onclick="prevStep()">
+            <span class="btn-arrow">&larr;</span> Back
+          </button>
+          <button type="button" class="btn-submit" id="submitBtn" onclick="submitForm()">
+            Submit Application <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </form>
+
+  <!-- Success Screen -->
+  <div class="success-screen" id="successScreen">
+    <div class="form-container">
+      <div class="success-icon">&#10003;</div>
+      <h2>Application Submitted</h2>
+      <p>Thank you for applying. Your application is being reviewed and we will contact you shortly regarding the next steps.</p>
+      <a href="index.html" class="btn-home">Return to Homepage <span class="btn-arrow">&rarr;</span></a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="form-footer">
+    <p>&copy; 2026 Global Realty Development. All rights reserved.</p>
+    <p style="margin-top:6px;">
+      <a href="index.html">Home</a> &nbsp;&middot;&nbsp;
+      <a href="listings.html">Properties</a> &nbsp;&middot;&nbsp;
+      <a href="contact.html">Contact</a>
+    </p>
+  </footer>
+
+  <script>
+    /* ============================================
+       TENANT INTAKE FORM - APPLICATION LOGIC
+       Multi-step wizard with validation, conditional
+       fields, file uploads, photo-to-PDF, signatures
+       ============================================ */
+
+    // --- State ---
+    let currentStep = 0;
+    const totalSteps = 5;
+    const stepNames = [
+      'Contact Information',
+      'Screening Questions',
+      'Occupants & Employment',
+      'Documents & Income',
+      'Authorization & Signatures'
+    ];
+
+    // --- Signature Pads ---
+    const sigPads = {};
+
+    function initSignaturePads() {
+      ['sig1', 'sig2', 'sig3'].forEach(id => {
+        const canvas = document.getElementById(id);
+        const wrapper = canvas.parentElement;
+
+        // High-DPI canvas sizing
+        function resizeCanvas() {
+          const ratio = Math.max(window.devicePixelRatio || 1, 1);
+          canvas.width = wrapper.offsetWidth * ratio;
+          canvas.height = wrapper.offsetHeight * ratio;
+          canvas.getContext('2d').scale(ratio, ratio);
+          canvas.style.width = wrapper.offsetWidth + 'px';
+          canvas.style.height = wrapper.offsetHeight + 'px';
+        }
+
+        resizeCanvas();
+
+        const pad = new SignaturePad(canvas, {
+          backgroundColor: 'rgba(247, 247, 247, 1)',
+          penColor: '#1A1A1A',
+          minWidth: 1,
+          maxWidth: 2.5,
+        });
+
+        // Track signature state for placeholder visibility
+        pad.addEventListener('beginStroke', () => {
+          wrapper.classList.add('has-sig');
+        });
+
+        sigPads[id] = pad;
+
+        window.addEventListener('resize', () => {
+          const data = pad.toData();
+          resizeCanvas();
+          pad.fromData(data);
+        });
+      });
+
+      // Signature action buttons (undo/clear)
+      document.querySelectorAll('.sig-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const padId = btn.dataset.pad;
+          const action = btn.dataset.action;
+          const pad = sigPads[padId];
+          const wrapper = document.getElementById(padId).parentElement;
+
+          if (action === 'undo') {
+            const data = pad.toData();
+            if (data.length > 0) {
+              data.pop();
+              pad.fromData(data);
+              if (data.length === 0) wrapper.classList.remove('has-sig');
+            }
+          } else if (action === 'clear') {
+            pad.clear();
+            wrapper.classList.remove('has-sig');
+          }
+        });
+      });
+    }
+
+    // --- Progress Bar ---
+    function updateProgress() {
+      const segs = document.querySelectorAll('.progress-seg');
+      segs.forEach((seg, i) => {
+        seg.classList.remove('active', 'completed');
+        if (i < currentStep) seg.classList.add('completed');
+        if (i === currentStep) seg.classList.add('active');
+      });
+      document.getElementById('stepCount').textContent = `Step ${currentStep + 1} of ${totalSteps}`;
+      document.getElementById('stepName').textContent = stepNames[currentStep];
+    }
+
+    // --- Step Navigation ---
+    function showStep(index, direction) {
+      const steps = document.querySelectorAll('.form-step');
+      steps.forEach(s => {
+        s.classList.remove('active', 'reverse');
+      });
+
+      const target = steps[index];
+      if (direction === 'back') target.classList.add('reverse');
+      target.classList.add('active');
+
+      currentStep = index;
+      updateProgress();
+
+      // Scroll to top of form
+      document.getElementById('progressWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function nextStep() {
+      if (!validateStep(currentStep)) return;
+      if (currentStep < totalSteps - 1) {
+        showStep(currentStep + 1, 'forward');
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        showStep(currentStep - 1, 'back');
+      }
+    }
+
+    // --- Validation ---
+    function validateStep(stepIndex) {
+      const step = document.querySelectorAll('.form-step')[stepIndex];
+      let valid = true;
+
+      // Clear previous errors
+      step.querySelectorAll('.field-group.has-error').forEach(fg => {
+        fg.classList.remove('has-error', 'shake');
+      });
+
+      // Validate text/email/tel inputs
+      step.querySelectorAll('input[required]:not([type="radio"]):not([type="checkbox"]):not([type="file"]):not([type="hidden"])').forEach(input => {
+        // Skip inputs inside hidden conditional sections
+        const conditional = input.closest('.conditional');
+        if (conditional && !conditional.classList.contains('visible')) return;
+
+        const fg = input.closest('.field-group');
+        if (!fg) return;
+
+        if (!input.value.trim()) {
+          fg.classList.add('has-error', 'shake');
+          valid = false;
+        } else if (input.type === 'email' && !input.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+          // Allow "SHELTER" as valid email for landlord fields
+          if (input.value.trim().toUpperCase() !== 'SHELTER') {
+            fg.classList.add('has-error', 'shake');
+            valid = false;
+          }
+        }
+      });
+
+      // Validate required selects
+      step.querySelectorAll('select[required]').forEach(select => {
+        const conditional = select.closest('.conditional');
+        if (conditional && !conditional.classList.contains('visible')) return;
+
+        const fg = select.closest('.field-group');
+        if (!select.value) {
+          fg.classList.add('has-error', 'shake');
+          valid = false;
+        }
+      });
+
+      // Validate required radio groups
+      const radioGroups = new Set();
+      step.querySelectorAll('input[type="radio"][required]').forEach(radio => {
+        radioGroups.add(radio.name);
+      });
+
+      radioGroups.forEach(name => {
+        const checked = step.querySelector(`input[name="${name}"]:checked`);
+        if (!checked) {
+          const radios = step.querySelectorAll(`input[name="${name}"]`);
+          const fg = radios[0].closest('.field-group');
+          if (fg) {
+            fg.classList.add('has-error', 'shake');
+            valid = false;
+          }
+        }
+      });
+
+      // Validate income checkboxes (step 3)
+      if (stepIndex === 3) {
+        const checked = step.querySelectorAll('input[name="incomeSources"]:checked');
+        if (checked.length === 0) {
+          const fg = step.querySelector('input[name="incomeSources"]').closest('.field-group');
+          fg.classList.add('has-error', 'shake');
+          valid = false;
+        }
+
+        // Validate conditional file uploads
+        if (document.getElementById('incCash').checked) {
+          const fileInput = step.querySelector('input[name="cashAssistLetter"]');
+          if (fileInput && !fileInput.files.length) {
+            const fg = fileInput.closest('.field-group');
+            fg.classList.add('has-error', 'shake');
+            valid = false;
+          }
+        }
+        if (document.getElementById('incSSI').checked) {
+          const fileInput = step.querySelector('input[name="ssiAwardLetter"]');
+          if (fileInput && !fileInput.files.length) {
+            const fg = fileInput.closest('.field-group');
+            fg.classList.add('has-error', 'shake');
+            valid = false;
+          }
+        }
+        if (document.getElementById('incOther').checked) {
+          const otherInput = document.getElementById('otherIncomeSource');
+          if (!otherInput.value.trim()) {
+            const fg = otherInput.closest('.field-group');
+            fg.classList.add('has-error', 'shake');
+            valid = false;
+          }
+        }
+      }
+
+      // Validate signatures (step 4)
+      if (stepIndex === 4) {
+        ['sig1', 'sig2', 'sig3'].forEach(id => {
+          if (sigPads[id] && sigPads[id].isEmpty()) {
+            const wrapper = document.getElementById(id).parentElement;
+            const fg = wrapper.closest('.field-group');
+            fg.classList.add('has-error', 'shake');
+            valid = false;
+          }
+        });
+      }
+
+      // Scroll to first error
+      if (!valid) {
+        const firstError = step.querySelector('.field-group.has-error');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+
+      return valid;
+    }
+
+    // --- Conditional Field Logic ---
+    function initConditionalFields() {
+      // Radio-based toggles
+      document.querySelectorAll('[data-toggle]').forEach(input => {
+        input.addEventListener('change', () => {
+          const targetId = input.dataset.toggle;
+          const target = document.getElementById(targetId);
+          if (!target) return;
+
+          const shouldHide = input.dataset.hide === 'true';
+          if (shouldHide) {
+            target.classList.remove('visible');
+          } else {
+            target.classList.add('visible');
+          }
+        });
+      });
+
+      // Checkbox-based toggles
+      document.querySelectorAll('.checkbox-option input[data-toggle]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const targetId = cb.dataset.toggle;
+          const target = document.getElementById(targetId);
+          if (!target) return;
+
+          if (cb.checked) {
+            target.classList.add('visible');
+          } else {
+            target.classList.remove('visible');
+          }
+        });
+      });
+
+      // N/A exclusive checkbox behavior
+      const naCheckbox = document.getElementById('incNA');
+      if (naCheckbox) {
+        naCheckbox.addEventListener('change', () => {
+          if (naCheckbox.checked) {
+            document.querySelectorAll('input[name="incomeSources"]:not(#incNA)').forEach(cb => {
+              cb.checked = false;
+              cb.dispatchEvent(new Event('change'));
+            });
+          }
+        });
+
+        document.querySelectorAll('input[name="incomeSources"]:not(#incNA)').forEach(cb => {
+          cb.addEventListener('change', () => {
+            if (cb.checked) naCheckbox.checked = false;
+          });
+        });
+      }
+
+      // Occupant count -> dynamic occupant fields
+      document.querySelectorAll('input[name="occupantCount"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          const count = parseInt(radio.value) || 7;
+          renderOccupantFields(Math.min(count, 7));
+        });
+      });
+    }
+
+    // --- Dynamic Occupant Fields ---
+    function renderOccupantFields(count) {
+      const container = document.getElementById('occupantFields');
+      container.innerHTML = '';
+
+      for (let i = 1; i <= count; i++) {
+        container.innerHTML += `
+          <div class="occupant-label">Person ${i}</div>
+          <div class="occupant-row">
+            <div class="field-group">
+              <label for="occName${i}">Full Name</label>
+              <input type="text" id="occName${i}" name="occupant${i}Name" placeholder="Full name">
+            </div>
+            <div class="field-group">
+              <label for="occRel${i}">Relationship to You</label>
+              <input type="text" id="occRel${i}" name="occupant${i}Relationship" placeholder="e.g., Spouse, Child, Parent">
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // --- File Upload Handling ---
+    function initFileUploads() {
+      document.querySelectorAll('.file-upload input[type="file"]').forEach(input => {
+        input.addEventListener('change', () => {
+          const wrapper = input.closest('.file-upload');
+          const nameEl = wrapper.querySelector('.file-upload__name');
+          const warningEl = wrapper.querySelector('.file-upload__warning');
+          const fg = wrapper.closest('.field-group');
+
+          if (input.files.length > 0) {
+            const file = input.files[0];
+            const isImage = file.type.startsWith('image/');
+
+            wrapper.classList.add('has-file');
+            nameEl.textContent = file.name;
+
+            if (isImage && warningEl) {
+              warningEl.style.display = 'block';
+            } else if (warningEl) {
+              warningEl.style.display = 'none';
+            }
+
+            // Clear error state
+            if (fg) fg.classList.remove('has-error');
+          } else {
+            wrapper.classList.remove('has-file');
+            nameEl.textContent = '';
+            if (warningEl) warningEl.style.display = 'none';
+          }
+        });
+      });
+    }
+
+    // --- Photo to PDF Conversion ---
+    async function convertImageToPDF(file) {
+      /* Converts a JPG/PNG image file to a PDF using jsPDF.
+         Returns a Blob of the resulting PDF. */
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+              orientation: img.width > img.height ? 'landscape' : 'portrait',
+              unit: 'px',
+              format: [img.width, img.height]
+            });
+            pdf.addImage(e.target.result, 'JPEG', 0, 0, img.width, img.height);
+            const blob = pdf.output('blob');
+            resolve(blob);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // --- Form Submission ---
+    async function submitForm() {
+      if (!validateStep(currentStep)) return;
+
+      const btn = document.getElementById('submitBtn');
+      btn.classList.add('loading');
+      btn.textContent = 'Submitting...';
+
+      try {
+        // Collect form data
+        const formData = new FormData(document.getElementById('tenantForm'));
+
+        // Add signature data
+        ['sig1', 'sig2', 'sig3'].forEach(id => {
+          const pad = sigPads[id];
+          if (pad && !pad.isEmpty()) {
+            formData.set(id + 'Data', pad.toDataURL('image/png'));
+          }
+        });
+
+        // Convert image uploads to PDF
+        const fileInputs = document.querySelectorAll('.file-upload input[type="file"]');
+        for (const input of fileInputs) {
+          if (input.files.length > 0) {
+            const file = input.files[0];
+            if (file.type.startsWith('image/')) {
+              const pdfBlob = await convertImageToPDF(file);
+              const pdfName = file.name.replace(/\.(jpg|jpeg|png)$/i, '.pdf');
+              formData.set(input.name, new File([pdfBlob], pdfName, { type: 'application/pdf' }));
+            }
+          }
+        }
+
+        // TODO: POST formData to backend API
+        // const response = await fetch('https://api.globalrealtydevelopment.com/apply', {
+        //   method: 'POST',
+        //   body: formData
+        // });
+
+        // Simulate submission delay for now
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Show success screen
+        document.getElementById('tenantForm').style.display = 'none';
+        document.getElementById('progressWrap').style.display = 'none';
+        document.getElementById('successScreen').classList.add('visible');
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      } catch (error) {
+        btn.classList.remove('loading');
+        btn.innerHTML = 'Submit Application <span class="btn-arrow">&rarr;</span>';
+        alert('There was an error submitting your application. Please try again.');
+      }
+    }
+
+    // --- Phone Number Formatting ---
+    function formatPhoneInput(input) {
+      input.addEventListener('input', () => {
+        let value = input.value.replace(/\D/g, '');
+        if (value.length > 10) value = value.slice(0, 10);
+
+        if (value.length >= 6) {
+          input.value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6)}`;
+        } else if (value.length >= 3) {
+          input.value = `(${value.slice(0, 3)}) ${value.slice(3)}`;
+        } else if (value.length > 0) {
+          input.value = `(${value}`;
+        }
+      });
+    }
+
+    // --- Apply Dropdown Toggle ---
+    function initDropdown() {
+      const dropdown = document.querySelector('.nav__dropdown');
+      if (!dropdown) return;
+      const toggle = dropdown.querySelector('.nav__dropdown-toggle');
+      toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+      });
+      document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
+      });
+    }
+
+    // --- Initialize ---
+    document.addEventListener('DOMContentLoaded', () => {
+      initDropdown();
+      initConditionalFields();
+      initFileUploads();
+      initSignaturePads();
+      updateProgress();
+
+      // Format phone inputs
+      document.querySelectorAll('input[type="tel"]').forEach(formatPhoneInput);
+
+      // Progress bar click navigation (only to completed steps)
+      document.querySelectorAll('.progress-seg').forEach(seg => {
+        seg.addEventListener('click', () => {
+          const step = parseInt(seg.dataset.step);
+          if (step < currentStep) {
+            showStep(step, 'back');
+          }
+        });
+      });
+
+      // Clear error state on input
+      document.querySelectorAll('input, select, textarea').forEach(el => {
+        el.addEventListener('input', () => {
+          const fg = el.closest('.field-group');
+          if (fg) fg.classList.remove('has-error', 'shake');
+        });
+        el.addEventListener('change', () => {
+          const fg = el.closest('.field-group');
+          if (fg) fg.classList.remove('has-error', 'shake');
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>
