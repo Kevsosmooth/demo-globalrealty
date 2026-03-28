@@ -987,9 +987,122 @@
     .form-footer a:hover { color: var(--color-orange-hover); }
 
     /* --- Responsive --- */
-    @media (max-width: 640px) {
+    /* --- Mobile Nav Toggle --- */
+    .nav__toggle {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .nav__toggle span {
+      display: block;
+      width: 28px;
+      height: 1.5px;
+      background: var(--color-white);
+      transition: transform 0.3s var(--ease-out), opacity 0.3s;
+    }
+
+    .nav__toggle.open span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .nav__toggle.open span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .nav__toggle.open span:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+
+    html.menu-open,
+    html.menu-open body {
+      overflow: hidden;
+    }
+
+    @media (max-width: 768px) {
       .nav__inner { padding: 0 20px; }
-      .nav__links { display: none; }
+
+      .nav {
+        background: rgba(13, 13, 13, 0.95);
+      }
+
+      html.menu-open .nav,
+      html.menu-open .nav.scrolled {
+        background: #0D0D0D;
+      }
+
+      .nav__links {
+        display: none;
+        position: fixed;
+        top: 70px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #0D0D0D;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 32px;
+        z-index: 1000;
+      }
+
+      .nav__links.open {
+        display: flex;
+      }
+
+      .nav__links a {
+        font-size: 1.2rem;
+      }
+
+      .nav__toggle {
+        display: flex;
+      }
+
+      /* Mobile dropdown */
+      .nav__dropdown {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .nav__dropdown-toggle {
+        font-size: 1.2rem;
+        padding: 14px 32px;
+      }
+
+      .nav__dropdown-menu {
+        position: static;
+        min-width: unset;
+        width: 100%;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        background: transparent;
+        border: none;
+        backdrop-filter: none;
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s var(--ease-out);
+      }
+
+      .nav__dropdown.open .nav__dropdown-menu {
+        max-height: 200px;
+      }
+
+      .nav__dropdown-menu a {
+        text-align: center;
+        font-size: 1rem;
+        padding: 10px 20px;
+        color: var(--color-gray-400) !important;
+      }
+
+      .nav__dropdown-menu .coming-soon {
+        color: var(--color-gray-700) !important;
+      }
 
       .page-header { padding: 120px 20px 48px; }
       .page-header h1 { font-size: 2rem; }
@@ -1107,6 +1220,11 @@
             <a class="coming-soon">Landlord Application <span>Coming Soon</span></a>
           </div>
         </div>
+      </div>
+      <div class="nav__toggle" role="button" tabindex="0" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
       </div>
     </div>
   </nav>
@@ -2321,16 +2439,60 @@
       });
     }
 
+    // --- Mobile Menu Toggle ---
+    function initMobileMenu() {
+      const toggle = document.querySelector('.nav__toggle');
+      const navLinks = document.querySelector('.nav__links');
+      if (!toggle || !navLinks) return;
+
+      toggle.addEventListener('click', () => {
+        toggle.classList.toggle('open');
+        navLinks.classList.toggle('open');
+        document.documentElement.classList.toggle('menu-open');
+      });
+
+      toggle.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle.click();
+        }
+      });
+
+      /* Close menu when a non-dropdown link is clicked */
+      navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          if (link.closest('.nav__dropdown')) return;
+          toggle.classList.remove('open');
+          navLinks.classList.remove('open');
+          document.documentElement.classList.remove('menu-open');
+        });
+      });
+    }
+
     // --- Apply Dropdown Toggle ---
     function initDropdown() {
       const dropdown = document.querySelector('.nav__dropdown');
       if (!dropdown) return;
-      const toggle = dropdown.querySelector('.nav__dropdown-toggle');
-      toggle.addEventListener('click', (e) => {
+      const ddToggle = dropdown.querySelector('.nav__dropdown-toggle');
+      ddToggle.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         dropdown.classList.toggle('open');
       });
+
+      /* Close mobile menu when a real dropdown link is clicked */
+      const navToggle = document.querySelector('.nav__toggle');
+      const navLinks = document.querySelector('.nav__links');
+      dropdown.querySelectorAll('.nav__dropdown-menu a:not(.coming-soon)').forEach(link => {
+        link.addEventListener('click', () => {
+          if (navToggle && navLinks) {
+            navToggle.classList.remove('open');
+            navLinks.classList.remove('open');
+            document.documentElement.classList.remove('menu-open');
+          }
+        });
+      });
+
       document.addEventListener('click', (e) => {
         if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
       });
@@ -2338,6 +2500,7 @@
 
     // --- Initialize ---
     document.addEventListener('DOMContentLoaded', () => {
+      initMobileMenu();
       initDropdown();
       initAutoSuggest();
       initConditionalFields();
