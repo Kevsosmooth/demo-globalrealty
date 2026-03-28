@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     toggle.addEventListener('click', () => {
       toggle.classList.toggle('open');
       navLinks.classList.toggle('open');
+      document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
     });
 
     toggle.addEventListener('keydown', (e) => {
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
       link.addEventListener('click', () => {
         toggle.classList.remove('open');
         navLinks.classList.remove('open');
+        document.body.style.overflow = '';
       });
     });
   }
