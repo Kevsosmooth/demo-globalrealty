@@ -1036,6 +1036,49 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* --- Auto-suggest Dropdown --- */
+    .autosuggest {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--color-pure-white);
+      border: 1px solid var(--color-input-border);
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 50;
+      display: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .autosuggest.open {
+      display: block;
+    }
+
+    .autosuggest__item {
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      color: #1A1A1A;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      border-bottom: 1px solid #F0F0F0;
+    }
+
+    .autosuggest__item:last-child {
+      border-bottom: none;
+    }
+
+    .autosuggest__item:hover,
+    .autosuggest__item.highlighted {
+      background: var(--color-orange-subtle);
+    }
+
+    .autosuggest__item strong {
+      color: var(--color-orange);
+    }
+
     /* --- Glow Line (from demo) --- */
     .glow-line {
       height: 1px;
@@ -1130,15 +1173,15 @@
           </div>
 
           <div class="field-row field-group">
-            <div class="field-group">
-              <label for="applyAddress">Address Applying To <span class="req">*</span></label>
-              <input type="text" id="applyAddress" name="applyAddress" required placeholder="Street address">
-              <div class="error-msg">Address is required</div>
+            <div class="field-group" style="position:relative;">
+              <label for="applyAddress">Address Applying To</label>
+              <input type="text" id="applyAddress" name="applyAddress" placeholder="Start typing to search..." autocomplete="off">
+              <div class="autosuggest" id="addressSuggest"></div>
+              <p class="helper">Leave blank if you are not sure yet</p>
             </div>
             <div class="field-group">
-              <label for="applyUnit">Unit Number <span class="req">*</span></label>
-              <input type="text" id="applyUnit" name="applyUnit" required placeholder="Unit #">
-              <div class="error-msg">Unit number is required</div>
+              <label for="applyUnit">Unit Number</label>
+              <input type="text" id="applyUnit" name="applyUnit" placeholder="Unit #">
             </div>
           </div>
         </div>
@@ -1232,10 +1275,10 @@
         <div class="section">
           <div class="section-title">Viewing</div>
           <div class="field-group">
-            <label>Did you view the apartment? <span class="req">*</span></label>
+            <label>Did you view the apartment?</label>
             <div class="radio-group">
               <div class="radio-option">
-                <input type="radio" id="viewedYes" name="viewedApartment" value="Yes" required>
+                <input type="radio" id="viewedYes" name="viewedApartment" value="Yes">
                 <label for="viewedYes">Yes</label>
               </div>
               <div class="radio-option">
@@ -1243,7 +1286,6 @@
                 <label for="viewedNo">No</label>
               </div>
             </div>
-            <div class="error-msg">Please select an option</div>
           </div>
         </div>
 
@@ -1308,7 +1350,7 @@
             </div>
 
             <div class="field-group">
-              <label>How many bedrooms is your voucher for? <span class="req">*</span></label>
+              <label>How many bedrooms is your voucher for?</label>
               <div class="radio-group radio-group--compact">
                 <div class="radio-option">
                   <input type="radio" id="bedStudio" name="voucherBedrooms" value="Studio">
@@ -1373,10 +1415,10 @@
           </div>
 
           <div class="field-group">
-            <label>What would you say your credit score would rank? <span class="req">*</span></label>
+            <label>What would you say your credit score would rank?</label>
             <div class="radio-group">
               <div class="radio-option">
-                <input type="radio" id="creditNone" name="creditScore" value="No Credit History" required>
+                <input type="radio" id="creditNone" name="creditScore" value="No Credit History">
                 <label for="creditNone">No Credit History</label>
               </div>
               <div class="radio-option">
@@ -1546,8 +1588,8 @@
 
           <div class="conditional" id="cashUpload">
             <div class="field-group">
-              <label>Cash Assistance Budget Letter <span class="req">*</span></label>
-              <p class="helper" style="margin-top:-4px; margin-bottom:10px;">Failure to upload will result in an incomplete application.</p>
+              <label>Cash Assistance Budget Letter</label>
+              <p class="helper" style="margin-top:-4px; margin-bottom:10px;">Recommended -- uploading this helps speed up your application.</p>
               <div class="file-upload" data-upload="cashAssistLetter">
                 <input type="file" name="cashAssistLetter" accept=".pdf,.jpg,.jpeg,.png">
                 <div class="file-upload__icon">&#8682;</div>
@@ -1556,14 +1598,13 @@
                 <div class="file-upload__name"></div>
                 <div class="file-upload__warning">Photo will be converted to PDF</div>
               </div>
-              <div class="error-msg">This document is required</div>
             </div>
           </div>
 
           <div class="conditional" id="ssiUpload">
             <div class="field-group">
-              <label>SSI Award Letter <span class="req">*</span></label>
-              <p class="helper" style="margin-top:-4px; margin-bottom:10px;">Failure to upload will result in an incomplete application.</p>
+              <label>SSI Award Letter</label>
+              <p class="helper" style="margin-top:-4px; margin-bottom:10px;">Recommended -- uploading this helps speed up your application.</p>
               <div class="file-upload" data-upload="ssiAwardLetter">
                 <input type="file" name="ssiAwardLetter" accept=".pdf,.jpg,.jpeg,.png">
                 <div class="file-upload__icon">&#8682;</div>
@@ -1572,7 +1613,6 @@
                 <div class="file-upload__name"></div>
                 <div class="file-upload__warning">Photo will be converted to PDF</div>
               </div>
-              <div class="error-msg">This document is required</div>
             </div>
           </div>
 
@@ -1599,21 +1639,19 @@
         <div class="section">
           <div class="section-title">Housing Specialist Contact</div>
 
+          <p class="helper" style="margin-top:-12px; margin-bottom:20px;">If you have a housing specialist, provide their info below.</p>
           <div class="field-row-3 field-group">
             <div class="field-group">
-              <label for="hsName">Name <span class="req">*</span></label>
-              <input type="text" id="hsName" name="housingSpecName" required placeholder="Full name">
-              <div class="error-msg">Name is required</div>
+              <label for="hsName">Name</label>
+              <input type="text" id="hsName" name="housingSpecName" placeholder="Full name">
             </div>
             <div class="field-group">
-              <label for="hsPhone">Phone <span class="req">*</span></label>
-              <input type="tel" id="hsPhone" name="housingSpecPhone" required placeholder="(555) 555-5555">
-              <div class="error-msg">Phone is required</div>
+              <label for="hsPhone">Phone</label>
+              <input type="tel" id="hsPhone" name="housingSpecPhone" placeholder="(555) 555-5555">
             </div>
             <div class="field-group">
-              <label for="hsEmail">Email <span class="req">*</span></label>
-              <input type="email" id="hsEmail" name="housingSpecEmail" required placeholder="email@example.com">
-              <div class="error-msg">Email is required</div>
+              <label for="hsEmail">Email</label>
+              <input type="email" id="hsEmail" name="housingSpecEmail" placeholder="email@example.com">
             </div>
           </div>
         </div>
@@ -1635,10 +1673,9 @@
               <div class="error-msg">Phone is required</div>
             </div>
             <div class="field-group">
-              <label for="llEmail">Landlord Email <span class="req">*</span></label>
-              <input type="email" id="llEmail" name="landlordEmail" required placeholder="email@example.com">
+              <label for="llEmail">Landlord Email</label>
+              <input type="email" id="llEmail" name="landlordEmail" placeholder="email@example.com">
               <p class="helper">If in shelter, type "SHELTER"</p>
-              <div class="error-msg">Email is required</div>
             </div>
           </div>
         </div>
@@ -1957,32 +1994,6 @@
           fg.classList.add('has-error', 'shake');
           valid = false;
         }
-
-        // Validate conditional file uploads
-        if (document.getElementById('incCash').checked) {
-          const fileInput = step.querySelector('input[name="cashAssistLetter"]');
-          if (fileInput && !fileInput.files.length) {
-            const fg = fileInput.closest('.field-group');
-            fg.classList.add('has-error', 'shake');
-            valid = false;
-          }
-        }
-        if (document.getElementById('incSSI').checked) {
-          const fileInput = step.querySelector('input[name="ssiAwardLetter"]');
-          if (fileInput && !fileInput.files.length) {
-            const fg = fileInput.closest('.field-group');
-            fg.classList.add('has-error', 'shake');
-            valid = false;
-          }
-        }
-        if (document.getElementById('incOther').checked) {
-          const otherInput = document.getElementById('otherIncomeSource');
-          if (!otherInput.value.trim()) {
-            const fg = otherInput.closest('.field-group');
-            fg.classList.add('has-error', 'shake');
-            valid = false;
-          }
-        }
       }
 
       // Validate signatures (step 4)
@@ -2208,6 +2219,97 @@
       }
     }
 
+    // --- Property Auto-Suggest ---
+    const PROPERTIES = [
+      { address: '2311 Grand Avenue, Bronx', units: ['Studio'] },
+      { address: '3020 Valentine Ave, Bronx', units: ['Unit 2A', 'Unit 2B', 'Unit 3A'] },
+      { address: '1845 Sedgwick Ave, Bronx', units: ['Unit 1A', 'Unit 1B'] },
+    ];
+
+    function initAutoSuggest() {
+      const input = document.getElementById('applyAddress');
+      const suggest = document.getElementById('addressSuggest');
+      const unitInput = document.getElementById('applyUnit');
+      if (!input || !suggest) return;
+
+      let highlightedIndex = -1;
+
+      input.addEventListener('input', () => {
+        const val = input.value.trim().toLowerCase();
+        suggest.innerHTML = '';
+        highlightedIndex = -1;
+
+        if (val.length < 1) {
+          suggest.classList.remove('open');
+          return;
+        }
+
+        const matches = PROPERTIES.filter(p =>
+          p.address.toLowerCase().includes(val)
+        );
+
+        if (matches.length === 0) {
+          suggest.classList.remove('open');
+          return;
+        }
+
+        matches.forEach((prop, i) => {
+          const item = document.createElement('div');
+          item.className = 'autosuggest__item';
+          /* Highlight the matching portion of the address */
+          const idx = prop.address.toLowerCase().indexOf(val);
+          if (idx >= 0) {
+            item.innerHTML =
+              prop.address.slice(0, idx) +
+              '<strong>' + prop.address.slice(idx, idx + val.length) + '</strong>' +
+              prop.address.slice(idx + val.length);
+          } else {
+            item.textContent = prop.address;
+          }
+          item.addEventListener('click', () => {
+            input.value = prop.address;
+            suggest.classList.remove('open');
+            /* Auto-populate unit if only one option */
+            if (prop.units.length === 1) {
+              unitInput.value = prop.units[0];
+            }
+            input.dispatchEvent(new Event('input'));
+          });
+          suggest.appendChild(item);
+        });
+
+        suggest.classList.add('open');
+      });
+
+      /* Keyboard navigation */
+      input.addEventListener('keydown', (e) => {
+        const items = suggest.querySelectorAll('.autosuggest__item');
+        if (!items.length) return;
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          highlightedIndex = Math.min(highlightedIndex + 1, items.length - 1);
+          items.forEach((it, i) => it.classList.toggle('highlighted', i === highlightedIndex));
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          highlightedIndex = Math.max(highlightedIndex - 1, 0);
+          items.forEach((it, i) => it.classList.toggle('highlighted', i === highlightedIndex));
+        } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+          e.preventDefault();
+          items[highlightedIndex].click();
+        } else if (e.key === 'Escape') {
+          suggest.classList.remove('open');
+        }
+      });
+
+      /* Close on outside click */
+      document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !suggest.contains(e.target)) {
+          suggest.classList.remove('open');
+        }
+      });
+    }
+
     // --- Phone Number Formatting ---
     function formatPhoneInput(input) {
       input.addEventListener('input', () => {
@@ -2242,6 +2344,7 @@
     // --- Initialize ---
     document.addEventListener('DOMContentLoaded', () => {
       initDropdown();
+      initAutoSuggest();
       initConditionalFields();
       initFileUploads();
       initSignaturePads();
