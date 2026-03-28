@@ -26,8 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Navbar scroll effect + progress bar ---
   const nav = document.querySelector('.nav');
+  const toggle = document.querySelector('.nav__toggle');
+  const navLinks = document.querySelector('.nav__links');
+
   window.addEventListener('scroll', () => {
-    if (nav) nav.classList.toggle('scrolled', window.scrollY > 40);
+    if (nav && !(navLinks && navLinks.classList.contains('open'))) {
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    }
 
     const scrollTop = window.scrollY;
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -36,28 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { passive: true });
 
   // --- Mobile menu toggle ---
-  const toggle = document.querySelector('.nav__toggle');
-  const navLinks = document.querySelector('.nav__links');
   if (toggle && navLinks) {
-    let scrollPos = 0;
     toggle.addEventListener('click', () => {
       toggle.classList.toggle('open');
       navLinks.classList.toggle('open');
-      if (navLinks.classList.contains('open')) {
-        scrollPos = window.scrollY;
-        document.body.style.position = 'fixed';
-        document.body.style.top = `-${scrollPos}px`;
-        document.body.style.left = '0';
-        document.body.style.right = '0';
-        document.body.style.overflow = 'hidden';
-      } else {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.left = '';
-        document.body.style.right = '';
-        document.body.style.overflow = '';
-        window.scrollTo(0, scrollPos);
-      }
+      document.documentElement.classList.toggle('menu-open');
     });
 
     toggle.addEventListener('keydown', (e) => {
@@ -71,12 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
       link.addEventListener('click', () => {
         toggle.classList.remove('open');
         navLinks.classList.remove('open');
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.left = '';
-        document.body.style.right = '';
-        document.body.style.overflow = '';
-        window.scrollTo(0, scrollPos);
+        document.documentElement.classList.remove('menu-open');
       });
     });
   }

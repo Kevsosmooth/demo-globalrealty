@@ -41,6 +41,13 @@
   box-sizing: border-box;
 }
 
+html.menu-open,
+html.menu-open body {
+  overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
 html {
   font-size: 16px;
   scroll-behavior: smooth;
