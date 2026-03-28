@@ -56,7 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
+      link.addEventListener('click', (e) => {
+        /* Do not close the mobile menu when clicking the dropdown toggle
+           or any element inside the dropdown menu */
+        if (link.closest('.nav__dropdown')) return;
         toggle.classList.remove('open');
         navLinks.classList.remove('open');
         document.documentElement.classList.remove('menu-open');
@@ -79,6 +82,17 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         dropdownToggle.click();
       }
+    });
+
+    /* Close mobile menu when a real dropdown link is clicked */
+    dropdown.querySelectorAll('.nav__dropdown-menu a:not(.coming-soon)').forEach(link => {
+      link.addEventListener('click', () => {
+        if (toggle && navLinks) {
+          toggle.classList.remove('open');
+          navLinks.classList.remove('open');
+          document.documentElement.classList.remove('menu-open');
+        }
+      });
     });
 
     document.addEventListener('click', (e) => {
