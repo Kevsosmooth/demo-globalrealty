@@ -1089,8 +1089,19 @@
 
       /** Attempts API fetch for a single property, falls back to hardcoded data. */
       function loadProperty() {
-        fetch(LISTINGS_CONFIG.API_URL + '/' + encodeURIComponent(propertyId), { signal: AbortSignal.timeout(3000) })
+        /* Skip fetch on github.io -- API is unreachable */
+        if (window.location.hostname.indexOf('github.io') !== -1) {
+          var prop = findInFallback(propertyId);
+          if (prop) { renderProperty(prop); } else { showNotFound(); }
+          return;
+        }
+
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function () { controller.abort(); }, 1500);
+
+        fetch(LISTINGS_CONFIG.API_URL + '/' + encodeURIComponent(propertyId), { signal: controller.signal })
           .then(function (res) {
+            clearTimeout(timeoutId);
             if (!res.ok) throw new Error('HTTP ' + res.status);
             return res.json();
           })
@@ -1099,6 +1110,7 @@
             renderProperty(data);
           })
           .catch(function () {
+            clearTimeout(timeoutId);
             var property = findInFallback(propertyId);
             if (property) {
               renderProperty(property);

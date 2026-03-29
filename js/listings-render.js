@@ -230,11 +230,22 @@
 
   /**
    * Attempts API fetch, falls back to hardcoded data on failure.
-   * The site works identically in both modes.
+   * Uses AbortController with a short timeout for broad browser support.
+   * On GitHub Pages the API is unreachable, so fallback kicks in fast.
    */
   function loadListings() {
-    fetch(LISTINGS_CONFIG.API_URL, { signal: AbortSignal.timeout(3000) })
+    /* Skip the fetch entirely if we're on github.io -- the API is unreachable */
+    if (window.location.hostname.indexOf('github.io') !== -1) {
+      renderAll(FALLBACK_DATA);
+      return;
+    }
+
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function () { controller.abort(); }, 1500);
+
+    fetch(LISTINGS_CONFIG.API_URL, { signal: controller.signal })
       .then(function (res) {
+        clearTimeout(timeoutId);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();
       })
@@ -244,6 +255,7 @@
         renderAll(listings);
       })
       .catch(function () {
+        clearTimeout(timeoutId);
         renderAll(FALLBACK_DATA);
       });
   }
