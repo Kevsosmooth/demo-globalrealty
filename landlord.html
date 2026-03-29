@@ -1,0 +1,3009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Global Realty Development - Landlord Information Form
+       Multi-step property onboarding form for landlords to submit
+       building details, ownership info, unit listings, and payment
+       preferences. Matches the demo site dark luxury aesthetic.
+       Uses Nominatim (OpenStreetMap) for free address autocomplete. -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#E87511">
+  <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+  <link rel="icon" type="image/png" href="img/logo.png">
+  <title>Landlord Application | Global Realty Development</title>
+  <meta name="description" content="Submit your property information to Global Realty Development for landlord onboarding.">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- jsPDF for client-side photo-to-PDF conversion -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- signature_pad for drawing signatures -->
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+  <style>
+    /* ============================================
+       LANDLORD INTAKE FORM STYLES
+       Dark luxury theme matching Global Realty demo.
+       Identical to tenant form styling for consistency.
+       ============================================ */
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --color-orange: #E87511;
+      --color-orange-hover: #FF8C2E;
+      --color-orange-subtle: rgba(232, 117, 17, 0.12);
+      --color-orange-glow: rgba(232, 117, 17, 0.25);
+      --color-black: #0D0D0D;
+      --color-charcoal: #1A1A1A;
+      --color-dark: #242424;
+      --color-card: #1E1E1E;
+      --color-card-border: rgba(255, 255, 255, 0.08);
+      --color-gray-900: #2A2A2A;
+      --color-gray-800: #333333;
+      --color-gray-700: #666666;
+      --color-gray-400: #AAAAAA;
+      --color-gray-300: #BBBBBB;
+      --color-gray-200: #D4D4D4;
+      --color-white: #FAFAFA;
+      --color-pure-white: #FFFFFF;
+      --color-input-bg: #F7F7F7;
+      --color-input-border: #D0D0D0;
+      --color-input-focus: #FFFFFF;
+      --color-error: #E85454;
+      --color-success: #4CAF50;
+
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'Outfit', sans-serif;
+
+      --nav-height: 80px;
+      --container-width: 720px;
+      --radius: 6px;
+      --input-height: 50px;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-weight: 300;
+      color: var(--color-gray-200);
+      background-color: var(--color-black);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* --- Navigation --- */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-height);
+      z-index: 1000;
+      background: rgba(13, 13, 13, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--color-card-border);
+    }
+
+    .nav__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    .nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .nav__logo-wordmark {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--color-orange);
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+    }
+
+    .nav__logo-wordmark span {
+      display: block;
+      font-size: 0.65rem;
+      font-family: var(--font-body);
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--color-gray-300);
+      margin-top: 2px;
+    }
+
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .nav__links a {
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-gray-300);
+      transition: color 0.3s var(--ease-out);
+    }
+
+    .nav__links a:hover,
+    .nav__links a.active {
+      color: var(--color-white);
+    }
+
+    /* Apply Dropdown */
+    .nav__dropdown {
+      position: relative;
+    }
+
+    .nav__dropdown-toggle {
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-black) !important;
+      background: var(--color-orange);
+      padding: 12px 28px;
+      cursor: pointer;
+      transition: background 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav__dropdown-toggle:hover {
+      background: var(--color-orange-hover);
+      transform: translateY(-1px);
+    }
+
+    .nav__dropdown-arrow {
+      font-size: 0.6rem;
+      transition: transform 0.3s var(--ease-out);
+    }
+
+    .nav__dropdown.open .nav__dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    .nav__dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 220px;
+      background: rgba(26, 26, 26, 0.98);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px 0;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: all 0.3s var(--ease-out);
+      z-index: 1001;
+    }
+
+    .nav__dropdown.open .nav__dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .nav__dropdown-menu a {
+      display: block;
+      padding: 12px 20px;
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-gray-300) !important;
+      transition: all 0.2s ease;
+    }
+
+    .nav__dropdown-menu a:hover {
+      color: var(--color-white) !important;
+      background: rgba(232, 117, 17, 0.08);
+    }
+
+    .nav__toggle {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .nav__toggle span {
+      display: block;
+      width: 28px;
+      height: 1.5px;
+      background: var(--color-white);
+      transition: transform 0.3s var(--ease-out), opacity 0.3s;
+    }
+
+    .nav__toggle.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .nav__toggle.open span:nth-child(2) { opacity: 0; }
+    .nav__toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    html.menu-open,
+    html.menu-open body {
+      overflow: hidden;
+      touch-action: none;
+      overscroll-behavior: none;
+    }
+
+    /* --- Page Header --- */
+    .page-header {
+      padding: 140px 0 60px;
+      text-align: center;
+      position: relative;
+    }
+
+    .page-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 1px;
+      background: var(--color-orange);
+    }
+
+    .page-header .label {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-orange);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .page-header .label::before,
+    .page-header .label::after {
+      content: '';
+      display: block;
+      width: 30px;
+      height: 1px;
+      background: var(--color-orange);
+      opacity: 0.5;
+    }
+
+    .page-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 400;
+      color: var(--color-white);
+      letter-spacing: -0.01em;
+      margin-bottom: 16px;
+    }
+
+    .page-header p {
+      font-size: 1rem;
+      color: var(--color-gray-400);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* --- Progress Bar --- */
+    .progress-wrap {
+      position: sticky;
+      top: var(--nav-height);
+      z-index: 100;
+      background: rgba(13, 13, 13, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-card-border);
+      padding: 20px 24px 16px;
+    }
+
+    .progress-container {
+      max-width: var(--container-width);
+      margin: 0 auto;
+    }
+
+    .progress-segments {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .progress-seg {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--color-gray-800);
+      transition: background 0.5s var(--ease-out), box-shadow 0.5s var(--ease-out);
+      cursor: pointer;
+    }
+
+    .progress-seg.completed { background: var(--color-orange); }
+    .progress-seg.active { background: var(--color-orange); box-shadow: 0 0 12px var(--color-orange-glow); }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .step-count {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--color-orange);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .step-name {
+      font-size: 0.7rem;
+      color: var(--color-gray-400);
+      letter-spacing: 0.06em;
+    }
+
+    /* --- Form Container --- */
+    .form-container {
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 40px 20px 100px;
+    }
+
+    /* --- Steps --- */
+    .form-step { display: none; }
+    .form-step.active { display: block; animation: stepIn 0.45s var(--ease-out) forwards; }
+    .form-step.active.reverse { animation: stepInReverse 0.45s var(--ease-out) forwards; }
+
+    @keyframes stepIn {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes stepInReverse {
+      from { opacity: 0; transform: translateX(-40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* --- Section Cards --- */
+    .section {
+      background: var(--color-card);
+      border: 1px solid var(--color-card-border);
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      margin-bottom: 20px;
+      transition: border-color 0.3s var(--ease-out);
+    }
+
+    .section:hover { border-color: rgba(255, 255, 255, 0.12); }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--color-white);
+      margin-bottom: 28px;
+      letter-spacing: 0.02em;
+      position: relative;
+      padding-bottom: 14px;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 32px;
+      height: 2px;
+      background: var(--color-orange);
+      transition: width 0.4s var(--ease-out);
+    }
+
+    .section:hover .section-title::after { width: 50px; }
+
+    /* --- Form Fields --- */
+    .field-group { margin-bottom: 22px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .field-row-4 { display: grid; grid-template-columns: 0.8fr 1fr 0.6fr 1fr; gap: 16px; }
+
+    label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--color-gray-400);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    label .req { color: var(--color-orange); margin-left: 2px; }
+
+    .helper {
+      font-size: 0.7rem;
+      color: var(--color-gray-700);
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    /* Input fields */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      min-height: var(--input-height);
+      padding: 14px 16px;
+      border: 1px solid var(--color-input-border);
+      border-radius: 4px;
+      font-size: 0.95rem;
+      font-family: var(--font-body);
+      font-weight: 400;
+      color: #1A1A1A;
+      background: var(--color-input-bg);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input::placeholder, textarea::placeholder { color: #A0A0A0; }
+
+    select {
+      color: #1A1A1A;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+    }
+
+    input:hover, select:hover, textarea:hover { border-color: #B0B0B0; }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--color-orange);
+      box-shadow: 0 0 0 3px var(--color-orange-subtle);
+      background: var(--color-input-focus);
+    }
+
+    textarea { resize: vertical; min-height: 100px; }
+
+    /* Error States */
+    .error-msg {
+      color: var(--color-error);
+      font-size: 0.7rem;
+      margin-top: 6px;
+      display: none;
+      letter-spacing: 0.02em;
+    }
+
+    .field-group.has-error .error-msg { display: block; }
+    .field-group.has-error input,
+    .field-group.has-error select,
+    .field-group.has-error textarea {
+      border-color: var(--color-error);
+      box-shadow: 0 0 0 3px rgba(232, 84, 84, 0.12);
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); }
+      40%, 80% { transform: translateX(4px); }
+    }
+
+    .field-group.shake { animation: shake 0.35s ease; }
+
+    .field-group.is-valid input,
+    .field-group.is-valid select { border-color: var(--color-success); }
+
+    /* --- Radio & Checkbox Groups --- */
+    .radio-group, .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .radio-option, .checkbox-option {
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 140px;
+    }
+
+    .radio-option input, .checkbox-option input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .radio-option label, .checkbox-option label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 20px;
+      background: var(--color-gray-900);
+      border: 1px solid var(--color-card-border);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--color-gray-300);
+      cursor: pointer;
+      transition: all 0.25s var(--ease-out);
+      text-transform: none;
+      letter-spacing: 0.02em;
+      text-align: center;
+      min-height: var(--input-height);
+    }
+
+    .radio-option input:checked + label,
+    .checkbox-option input:checked + label {
+      background: var(--color-orange-subtle);
+      border-color: var(--color-orange);
+      color: var(--color-white);
+    }
+
+    .radio-option label:hover, .checkbox-option label:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      color: var(--color-white);
+    }
+
+    .radio-group--compact .radio-option { min-width: 100px; flex: 0 1 auto; }
+    .radio-group--compact .radio-option label { padding: 10px 16px; font-size: 0.8rem; min-height: 42px; }
+
+    /* --- File Upload --- */
+    .file-upload {
+      position: relative;
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.3s ease, background 0.3s ease;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .file-upload:hover { border-color: var(--color-orange); background: rgba(232, 117, 17, 0.04); }
+
+    .file-upload.has-file {
+      border-color: var(--color-success);
+      border-style: solid;
+      background: rgba(76, 175, 80, 0.04);
+    }
+
+    .file-upload input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      min-height: unset;
+      padding: 0;
+      border: none;
+    }
+
+    .file-upload__icon {
+      font-size: 1.8rem;
+      color: var(--color-gray-700);
+      margin-bottom: 8px;
+      transition: color 0.3s ease;
+    }
+
+    .file-upload:hover .file-upload__icon { color: var(--color-orange); }
+
+    .file-upload__text { font-size: 0.85rem; color: var(--color-gray-400); }
+    .file-upload__text strong { color: var(--color-orange); font-weight: 500; }
+    .file-upload__hint { font-size: 0.7rem; color: var(--color-gray-700); margin-top: 6px; }
+
+    .file-upload__name {
+      font-size: 0.8rem;
+      color: var(--color-success);
+      margin-top: 8px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .file-upload.has-file .file-upload__name { display: block; }
+    .file-upload.has-file .file-upload__icon { color: var(--color-success); }
+
+    .file-upload__warning {
+      font-size: 0.7rem;
+      color: var(--color-orange);
+      margin-top: 4px;
+      display: none;
+    }
+
+    /* --- Signature Pad --- */
+    .sig-label { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+    .sig-label label { margin-bottom: 0; }
+    .sig-hint { font-size: 0.7rem; color: var(--color-gray-700); font-style: italic; }
+
+    .signature-pad-wrapper {
+      position: relative;
+      background: var(--color-input-bg);
+      border: 1px solid var(--color-input-border);
+      border-radius: 4px;
+      height: 140px;
+      overflow: hidden;
+    }
+
+    .signature-pad-wrapper canvas { width: 100%; height: 100%; cursor: crosshair; }
+
+    .sig-placeholder {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.85rem;
+      color: #C0C0C0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .signature-pad-wrapper.has-sig .sig-placeholder { opacity: 0; }
+
+    .sig-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+    .sig-btn {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-gray-400);
+      background: var(--color-gray-900);
+      border: 1px solid var(--color-card-border);
+      padding: 6px 14px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .sig-btn:hover { color: var(--color-white); border-color: rgba(255, 255, 255, 0.2); }
+
+    /* --- Navigation Buttons --- */
+    .form-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid var(--color-card-border);
+    }
+
+    .btn-prev, .btn-next, .btn-submit {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 16px 36px;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.35s var(--ease-out);
+      border: none;
+    }
+
+    .btn-next, .btn-submit { background: var(--color-orange); color: var(--color-black); }
+
+    .btn-next:hover, .btn-submit:hover {
+      background: var(--color-orange-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px var(--color-orange-glow);
+    }
+
+    .btn-prev {
+      background: transparent;
+      color: var(--color-gray-400);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-prev:hover { color: var(--color-white); border-color: var(--color-orange); }
+    .btn-submit { padding: 18px 48px; }
+
+    .btn-arrow { transition: transform 0.3s var(--ease-out); font-size: 1rem; }
+    .btn-next:hover .btn-arrow { transform: translateX(4px); }
+    .btn-prev:hover .btn-arrow { transform: translateX(-4px); }
+
+    /* --- Conditional Fields --- */
+    .conditional { display: none; overflow: hidden; }
+    .conditional.visible { display: block; animation: fadeInDown 0.35s var(--ease-out) forwards; }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- Unit Row --- */
+    .unit-row {
+      display: grid;
+      grid-template-columns: 0.7fr 1fr 0.7fr 1fr 40px;
+      gap: 12px;
+      align-items: end;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--color-card-border);
+      animation: fadeInDown 0.3s var(--ease-out) forwards;
+    }
+
+    .unit-row:last-child { border-bottom: none; }
+
+    .unit-remove {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      color: var(--color-gray-700);
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all 0.2s ease;
+      margin-bottom: 22px;
+    }
+
+    .unit-remove:hover { color: var(--color-error); border-color: var(--color-error); }
+
+    .btn-add-unit {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-orange);
+      background: transparent;
+      border: 1px dashed var(--color-orange);
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.25s var(--ease-out);
+      margin-top: 16px;
+    }
+
+    .btn-add-unit:hover { background: var(--color-orange-subtle); }
+
+    /* --- Password Toggle --- */
+    .input-with-toggle {
+      position: relative;
+    }
+
+    .input-with-toggle input {
+      padding-right: 48px;
+    }
+
+    .toggle-visibility {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--color-gray-700);
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-family: var(--font-body);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 4px;
+      transition: color 0.2s ease;
+    }
+
+    .toggle-visibility:hover { color: var(--color-orange); }
+
+    /* --- Auto-suggest Dropdown --- */
+    .autosuggest {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--color-pure-white);
+      border: 1px solid var(--color-input-border);
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 50;
+      display: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .autosuggest.open { display: block; }
+
+    .autosuggest__item {
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: #1A1A1A;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      border-bottom: 1px solid #F0F0F0;
+      line-height: 1.4;
+    }
+
+    .autosuggest__item:last-child { border-bottom: none; }
+    .autosuggest__item:hover, .autosuggest__item.highlighted { background: var(--color-orange-subtle); }
+
+    /* --- Success Screen --- */
+    .success-screen { display: none; text-align: center; padding: 80px 20px; }
+    .success-screen.visible { display: block; }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--color-orange-subtle);
+      border: 2px solid var(--color-orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 32px;
+      font-size: 2rem;
+    }
+
+    .success-screen h2 {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      color: var(--color-white);
+      margin-bottom: 16px;
+    }
+
+    .success-screen p { color: var(--color-gray-400); max-width: 480px; margin: 0 auto 40px; }
+
+    .success-screen .btn-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 16px 36px;
+      background: var(--color-orange);
+      color: var(--color-black);
+      border: none;
+      cursor: pointer;
+      transition: all 0.35s var(--ease-out);
+    }
+
+    .success-screen .btn-home:hover { background: var(--color-orange-hover); transform: translateY(-2px); }
+
+    /* --- Footer --- */
+    .form-footer {
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid var(--color-card-border);
+      font-size: 0.75rem;
+      color: var(--color-gray-700);
+      letter-spacing: 0.04em;
+    }
+
+    .form-footer a { color: var(--color-orange); transition: color 0.2s ease; }
+    .form-footer a:hover { color: var(--color-orange-hover); }
+
+    /* --- Loading State --- */
+    .btn-submit.loading { pointer-events: none; opacity: 0.7; }
+
+    .btn-submit.loading::after {
+      content: '';
+      width: 16px;
+      height: 16px;
+      border: 2px solid transparent;
+      border-top-color: var(--color-black);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-left: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* --- Glow Line --- */
+    .glow-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--color-orange), transparent);
+      opacity: 0.3;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 768px) {
+      :root { --nav-height: 70px; }
+      .nav__inner { padding: 0 20px; }
+      .nav { background: rgba(13, 13, 13, 0.95); backdrop-filter: none; }
+
+      html.menu-open .nav,
+      html.menu-open .nav.scrolled { background: #0D0D0D; backdrop-filter: none; }
+
+      .nav__links {
+        display: none;
+        position: fixed;
+        top: var(--nav-height);
+        left: 0; right: 0; bottom: 0;
+        background: #0D0D0D;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 32px;
+        z-index: 1000;
+      }
+
+      .nav__links.open { display: flex; }
+      .nav__links a { font-size: 1.2rem; }
+      .nav__toggle { display: flex; }
+
+      .nav__dropdown { width: 100%; display: flex; flex-direction: column; align-items: center; }
+      .nav__dropdown-toggle { font-size: 1.2rem; padding: 14px 32px; }
+
+      .nav__dropdown-menu {
+        position: static;
+        min-width: unset;
+        width: 100%;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        background: transparent;
+        border: none;
+        backdrop-filter: none;
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s var(--ease-out);
+      }
+
+      .nav__dropdown.open .nav__dropdown-menu { max-height: 200px; }
+      .nav__dropdown-menu a { text-align: center; font-size: 1rem; padding: 10px 20px; color: var(--color-gray-400) !important; }
+
+      .page-header { padding: 120px 20px 48px; }
+      .page-header h1 { font-size: 2rem; }
+      .progress-wrap { padding: 16px 16px 12px; }
+      .form-container { padding: 24px 16px 80px; }
+      .section { padding: 28px 20px; }
+
+      .field-row, .field-row-3, .field-row-4 { grid-template-columns: 1fr; }
+      .unit-row { grid-template-columns: 1fr 1fr; }
+      .unit-row .unit-remove { margin-bottom: 0; }
+
+      .radio-option, .checkbox-option { min-width: 100%; }
+      .form-nav { flex-direction: column-reverse; gap: 12px; }
+      .btn-prev, .btn-next, .btn-submit { width: 100%; justify-content: center; }
+      .signature-pad-wrapper { height: 120px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">
+        <span class="nav__logo-wordmark">Global <span>Realty Development</span></span>
+      </a>
+      <div class="nav__links">
+        <a href="index.html">Home</a>
+        <a href="listings.html">Properties</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <div class="nav__dropdown">
+          <a class="nav__dropdown-toggle" role="button" tabindex="0">Apply <span class="nav__dropdown-arrow">&#9660;</span></a>
+          <div class="nav__dropdown-menu">
+            <a href="apply.html">Tenant Application</a>
+            <a href="landlord.html">Landlord Application</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav__toggle" role="button" tabindex="0" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="label">Property Onboarding</div>
+    <h1>Landlord Information Form</h1>
+    <p>Complete the form below to submit your property for lease-up. All fields marked with an asterisk are required.</p>
+  </header>
+
+  <div class="glow-line"></div>
+
+  <!-- Progress Bar -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-container">
+      <div class="progress-segments">
+        <div class="progress-seg active" data-step="0"></div>
+        <div class="progress-seg" data-step="1"></div>
+        <div class="progress-seg" data-step="2"></div>
+        <div class="progress-seg" data-step="3"></div>
+        <div class="progress-seg" data-step="4"></div>
+        <div class="progress-seg" data-step="5"></div>
+      </div>
+      <div class="progress-info">
+        <span class="step-count" id="stepCount">Step 1 of 6</span>
+        <span class="step-name" id="stepName">Property & Ownership</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form id="landlordForm" novalidate>
+    <div class="form-container">
+
+      <!-- ==================== STEP 1: Property & Ownership ==================== -->
+      <div class="form-step active" data-step="0">
+
+        <div class="section">
+          <div class="section-title">Property Address</div>
+
+          <div class="field-group" style="position:relative;">
+            <label for="propAddress">Street Address <span class="req">*</span></label>
+            <input type="text" id="propAddress" name="propAddress" required placeholder="Start typing to search..." autocomplete="off">
+            <div class="autosuggest" id="propAddressSuggest"></div>
+            <p class="helper">Address will auto-fill city, state, and zip</p>
+            <div class="error-msg">Street address is required</div>
+          </div>
+
+          <div class="field-group">
+            <label for="propAddress2">Address Line 2</label>
+            <input type="text" id="propAddress2" name="propAddress2" placeholder="Suite, building name (optional)">
+          </div>
+
+          <div class="field-row-3 field-group">
+            <div class="field-group">
+              <label for="propCity">City <span class="req">*</span></label>
+              <input type="text" id="propCity" name="propCity" required placeholder="City">
+              <div class="error-msg">City is required</div>
+            </div>
+            <div class="field-group">
+              <label for="propState">State <span class="req">*</span></label>
+              <select id="propState" name="propState" required>
+                <option value="">Select</option>
+                <option value="NY">New York</option>
+                <option value="NJ">New Jersey</option>
+                <option value="CT">Connecticut</option>
+                <option value="PA">Pennsylvania</option>
+                <option value="AL">Alabama</option>
+                <option value="AK">Alaska</option>
+                <option value="AZ">Arizona</option>
+                <option value="AR">Arkansas</option>
+                <option value="CA">California</option>
+                <option value="CO">Colorado</option>
+                <option value="DE">Delaware</option>
+                <option value="FL">Florida</option>
+                <option value="GA">Georgia</option>
+                <option value="HI">Hawaii</option>
+                <option value="ID">Idaho</option>
+                <option value="IL">Illinois</option>
+                <option value="IN">Indiana</option>
+                <option value="IA">Iowa</option>
+                <option value="KS">Kansas</option>
+                <option value="KY">Kentucky</option>
+                <option value="LA">Louisiana</option>
+                <option value="ME">Maine</option>
+                <option value="MD">Maryland</option>
+                <option value="MA">Massachusetts</option>
+                <option value="MI">Michigan</option>
+                <option value="MN">Minnesota</option>
+                <option value="MS">Mississippi</option>
+                <option value="MO">Missouri</option>
+                <option value="MT">Montana</option>
+                <option value="NE">Nebraska</option>
+                <option value="NV">Nevada</option>
+                <option value="NH">New Hampshire</option>
+                <option value="NM">New Mexico</option>
+                <option value="NC">North Carolina</option>
+                <option value="ND">North Dakota</option>
+                <option value="OH">Ohio</option>
+                <option value="OK">Oklahoma</option>
+                <option value="OR">Oregon</option>
+                <option value="RI">Rhode Island</option>
+                <option value="SC">South Carolina</option>
+                <option value="SD">South Dakota</option>
+                <option value="TN">Tennessee</option>
+                <option value="TX">Texas</option>
+                <option value="UT">Utah</option>
+                <option value="VT">Vermont</option>
+                <option value="VA">Virginia</option>
+                <option value="WA">Washington</option>
+                <option value="WV">West Virginia</option>
+                <option value="WI">Wisconsin</option>
+                <option value="WY">Wyoming</option>
+                <option value="DC">Washington DC</option>
+              </select>
+              <div class="error-msg">State is required</div>
+            </div>
+            <div class="field-group">
+              <label for="propZip">Zip Code <span class="req">*</span></label>
+              <input type="text" id="propZip" name="propZip" required placeholder="Zip" maxlength="10">
+              <div class="error-msg">Zip code is required</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Legal Ownership Details</div>
+
+          <div class="field-group">
+            <label for="ownershipType">Ownership Type <span class="req">*</span></label>
+            <select id="ownershipType" name="ownershipType" required>
+              <option value="">Select ownership type</option>
+              <option value="LLC">LLC</option>
+              <option value="Corporation">Corporation</option>
+              <option value="Individual">Individual</option>
+              <option value="Partnership">Partnership</option>
+              <option value="Trust">Trust</option>
+              <option value="Other">Other</option>
+            </select>
+            <div class="error-msg">Ownership type is required</div>
+          </div>
+
+          <div class="field-group">
+            <label for="taxId">Tax ID / EIN <span class="req">*</span></label>
+            <input type="text" id="taxId" name="taxId" required placeholder="XX-XXXXXXX" maxlength="10">
+            <p class="helper">Format: XX-XXXXXXX</p>
+            <div class="error-msg">Tax ID is required</div>
+          </div>
+
+          <div class="field-group">
+            <label>SS-4 Notice Letter / Proof of EIN <span class="req">*</span></label>
+            <div class="file-upload" data-upload="ss4Letter">
+              <input type="file" name="ss4Letter" accept=".pdf,.jpg,.jpeg,.png" required>
+              <div class="file-upload__icon">&#8682;</div>
+              <div class="file-upload__text">Drag files here or <strong>browse</strong></div>
+              <div class="file-upload__hint">PDF, JPG, or PNG. Photos will be converted to PDF.</div>
+              <div class="file-upload__name"></div>
+              <div class="file-upload__warning">Photo will be converted to PDF</div>
+            </div>
+            <div class="error-msg">Proof of EIN is required</div>
+          </div>
+
+          <div class="field-group">
+            <label for="legalBusinessName">Legal Business Owner Name <span class="req">*</span></label>
+            <input type="text" id="legalBusinessName" name="legalBusinessName" required placeholder="Full legal name of business owner">
+            <div class="error-msg">Legal business owner name is required</div>
+          </div>
+
+          <div class="field-group">
+            <label for="legalName">Legal Name (Name on Government-Issued ID) <span class="req">*</span></label>
+            <input type="text" id="legalName" name="legalName" required placeholder="Name as it appears on your ID">
+            <div class="error-msg">Legal name is required</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Banking Information</div>
+
+          <div class="field-group">
+            <label for="bankName">Bank Name <span class="req">*</span></label>
+            <select id="bankName" name="bankName" required>
+              <option value="">Select your bank</option>
+              <option value="Chase">Chase</option>
+              <option value="Bank of America">Bank of America</option>
+              <option value="Wells Fargo">Wells Fargo</option>
+              <option value="Citibank">Citibank</option>
+              <option value="TD Bank">TD Bank</option>
+              <option value="Capital One">Capital One</option>
+              <option value="PNC Bank">PNC Bank</option>
+              <option value="US Bank">US Bank</option>
+              <option value="M&T Bank">M&T Bank</option>
+              <option value="Santander">Santander</option>
+              <option value="KeyBank">KeyBank</option>
+              <option value="Regions Bank">Regions Bank</option>
+              <option value="Citizens Bank">Citizens Bank</option>
+              <option value="HSBC">HSBC</option>
+              <option value="Popular Bank">Popular Bank</option>
+              <option value="Self Reliance (NY)">Self Reliance (NY)</option>
+              <option value="Signature Bank">Signature Bank</option>
+              <option value="Valley National Bank">Valley National Bank</option>
+              <option value="Columbia Bank">Columbia Bank</option>
+              <option value="Other">Other</option>
+            </select>
+            <div class="error-msg">Bank name is required</div>
+          </div>
+
+          <div class="conditional" id="otherBankField">
+            <div class="field-group">
+              <label for="bankNameOther">Specify Bank Name <span class="req">*</span></label>
+              <input type="text" id="bankNameOther" name="bankNameOther" placeholder="Enter your bank name">
+              <div class="error-msg">Bank name is required</div>
+            </div>
+          </div>
+
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="bankAcct">Account Number <span class="req">*</span></label>
+              <div class="input-with-toggle">
+                <input type="password" id="bankAcct" name="bankAcct" required placeholder="Account number" style="width:100%;min-height:var(--input-height);padding:14px 48px 14px 16px;border:1px solid var(--color-input-border);border-radius:4px;font-size:0.95rem;font-family:var(--font-body);font-weight:400;color:#1A1A1A;background:var(--color-input-bg);transition:border-color 0.3s ease,box-shadow 0.3s ease,background 0.3s ease;-webkit-appearance:none;appearance:none;">
+                <button type="button" class="toggle-visibility" data-target="bankAcct">Show</button>
+              </div>
+              <div class="error-msg">Account number is required</div>
+            </div>
+            <div class="field-group">
+              <label for="bankAcctConfirm">Confirm Account Number <span class="req">*</span></label>
+              <div class="input-with-toggle">
+                <input type="password" id="bankAcctConfirm" name="bankAcctConfirm" required placeholder="Re-enter account number" style="width:100%;min-height:var(--input-height);padding:14px 48px 14px 16px;border:1px solid var(--color-input-border);border-radius:4px;font-size:0.95rem;font-family:var(--font-body);font-weight:400;color:#1A1A1A;background:var(--color-input-bg);transition:border-color 0.3s ease,box-shadow 0.3s ease,background 0.3s ease;-webkit-appearance:none;appearance:none;">
+                <button type="button" class="toggle-visibility" data-target="bankAcctConfirm">Show</button>
+              </div>
+              <div class="error-msg">Account numbers must match</div>
+            </div>
+          </div>
+
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="bankRouting">Routing Number <span class="req">*</span></label>
+              <input type="text" id="bankRouting" name="bankRouting" required placeholder="9-digit routing number" maxlength="9">
+              <div class="error-msg">Routing number is required (9 digits)</div>
+            </div>
+            <div class="field-group">
+              <label for="bankRoutingConfirm">Confirm Routing Number <span class="req">*</span></label>
+              <input type="text" id="bankRoutingConfirm" name="bankRoutingConfirm" required placeholder="Re-enter routing number" maxlength="9">
+              <div class="error-msg">Routing numbers must match</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-nav">
+          <div></div>
+          <button type="button" class="btn-next" onclick="nextStep()">
+            Continue <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== STEP 2: Contacts & Mailing ==================== -->
+      <div class="form-step" data-step="1">
+
+        <div class="section">
+          <div class="section-title">Mailing Address</div>
+
+          <div class="field-group">
+            <label>Same as property address?</label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="mailSameYes" name="mailingSame" value="Yes" data-toggle="mailingFields" data-hide="true">
+                <label for="mailSameYes">Yes</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="mailSameNo" name="mailingSame" value="No" data-toggle="mailingFields">
+                <label for="mailSameNo">No</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="conditional" id="mailingFields">
+            <div class="field-group" style="position:relative;">
+              <label for="mailAddress">Mailing Address <span class="req">*</span></label>
+              <input type="text" id="mailAddress" name="mailAddress" placeholder="Start typing to search..." autocomplete="off">
+              <div class="autosuggest" id="mailAddressSuggest"></div>
+              <p class="helper">Full mailing address of the building owner</p>
+            </div>
+
+            <div class="field-group">
+              <label for="mailAddress2">Address Line 2</label>
+              <input type="text" id="mailAddress2" name="mailAddress2" placeholder="Apt, suite, floor (optional)">
+            </div>
+
+            <div class="field-row-3 field-group">
+              <div class="field-group">
+                <label for="mailCity">City</label>
+                <input type="text" id="mailCity" name="mailCity" placeholder="City">
+              </div>
+              <div class="field-group">
+                <label for="mailState">State</label>
+                <select id="mailState" name="mailState">
+                  <option value="">Select</option>
+                  <option value="NY">New York</option>
+                  <option value="NJ">New Jersey</option>
+                  <option value="CT">Connecticut</option>
+                  <option value="PA">Pennsylvania</option>
+                  <option value="AL">Alabama</option>
+                  <option value="AK">Alaska</option>
+                  <option value="AZ">Arizona</option>
+                  <option value="AR">Arkansas</option>
+                  <option value="CA">California</option>
+                  <option value="CO">Colorado</option>
+                  <option value="DE">Delaware</option>
+                  <option value="FL">Florida</option>
+                  <option value="GA">Georgia</option>
+                  <option value="HI">Hawaii</option>
+                  <option value="ID">Idaho</option>
+                  <option value="IL">Illinois</option>
+                  <option value="IN">Indiana</option>
+                  <option value="IA">Iowa</option>
+                  <option value="KS">Kansas</option>
+                  <option value="KY">Kentucky</option>
+                  <option value="LA">Louisiana</option>
+                  <option value="ME">Maine</option>
+                  <option value="MD">Maryland</option>
+                  <option value="MA">Massachusetts</option>
+                  <option value="MI">Michigan</option>
+                  <option value="MN">Minnesota</option>
+                  <option value="MS">Mississippi</option>
+                  <option value="MO">Missouri</option>
+                  <option value="MT">Montana</option>
+                  <option value="NE">Nebraska</option>
+                  <option value="NV">Nevada</option>
+                  <option value="NH">New Hampshire</option>
+                  <option value="NM">New Mexico</option>
+                  <option value="NC">North Carolina</option>
+                  <option value="ND">North Dakota</option>
+                  <option value="OH">Ohio</option>
+                  <option value="OK">Oklahoma</option>
+                  <option value="OR">Oregon</option>
+                  <option value="RI">Rhode Island</option>
+                  <option value="SC">South Carolina</option>
+                  <option value="SD">South Dakota</option>
+                  <option value="TN">Tennessee</option>
+                  <option value="TX">Texas</option>
+                  <option value="UT">Utah</option>
+                  <option value="VT">Vermont</option>
+                  <option value="VA">Virginia</option>
+                  <option value="WA">Washington</option>
+                  <option value="WV">West Virginia</option>
+                  <option value="WI">Wisconsin</option>
+                  <option value="WY">Wyoming</option>
+                  <option value="DC">Washington DC</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="mailZip">Zip Code</label>
+                <input type="text" id="mailZip" name="mailZip" placeholder="Zip" maxlength="10">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Landlord Contact Details</div>
+
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="llFirstName">First Name <span class="req">*</span></label>
+              <input type="text" id="llFirstName" name="llFirstName" required placeholder="First name">
+              <div class="error-msg">First name is required</div>
+            </div>
+            <div class="field-group">
+              <label for="llLastName">Last Name <span class="req">*</span></label>
+              <input type="text" id="llLastName" name="llLastName" required placeholder="Last name">
+              <div class="error-msg">Last name is required</div>
+            </div>
+          </div>
+
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="llPhone">Phone Number <span class="req">*</span></label>
+              <input type="tel" id="llPhone" name="llPhone" required placeholder="(555) 555-5555">
+              <div class="error-msg">Phone number is required</div>
+            </div>
+            <div class="field-group">
+              <label for="llEmail">Email Address <span class="req">*</span></label>
+              <input type="email" id="llEmail" name="llEmail" required placeholder="you@email.com">
+              <div class="error-msg">Valid email is required</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Authorized Representative</div>
+
+          <div class="field-group">
+            <label>Do you have an authorized representative? </label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="authRepYes" name="hasAuthRep" value="Yes" data-toggle="authRepFields">
+                <label for="authRepYes">Yes</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="authRepNo" name="hasAuthRep" value="No" data-toggle="authRepFields" data-hide="true">
+                <label for="authRepNo">No</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="conditional" id="authRepFields">
+            <div class="field-row field-group">
+              <div class="field-group">
+                <label for="authRepFirst">First Name <span class="req">*</span></label>
+                <input type="text" id="authRepFirst" name="authRepFirst" placeholder="First name">
+                <div class="error-msg">First name is required</div>
+              </div>
+              <div class="field-group">
+                <label for="authRepLast">Last Name <span class="req">*</span></label>
+                <input type="text" id="authRepLast" name="authRepLast" placeholder="Last name">
+                <div class="error-msg">Last name is required</div>
+              </div>
+            </div>
+            <div class="field-row field-group">
+              <div class="field-group">
+                <label for="authRepPhone">Phone Number <span class="req">*</span></label>
+                <input type="tel" id="authRepPhone" name="authRepPhone" placeholder="(555) 555-5555">
+                <div class="error-msg">Phone number is required</div>
+              </div>
+              <div class="field-group">
+                <label for="authRepEmail">Email Address <span class="req">*</span></label>
+                <input type="email" id="authRepEmail" name="authRepEmail" placeholder="email@example.com">
+                <div class="error-msg">Valid email is required</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-nav">
+          <button type="button" class="btn-prev" onclick="prevStep()">
+            <span class="btn-arrow">&larr;</span> Back
+          </button>
+          <button type="button" class="btn-next" onclick="nextStep()">
+            Continue <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== STEP 3: Building Details ==================== -->
+      <div class="form-step" data-step="2">
+
+        <div class="section">
+          <div class="section-title">Building Information</div>
+
+          <div class="field-group">
+            <label>Building Deed <span class="req">*</span></label>
+            <div class="file-upload" data-upload="buildingDeed">
+              <input type="file" name="buildingDeed" accept=".pdf,.jpg,.jpeg,.png" required>
+              <div class="file-upload__icon">&#8682;</div>
+              <div class="file-upload__text">Drag files here or <strong>browse</strong></div>
+              <div class="file-upload__hint">PDF, JPG, or PNG. Photos will be converted to PDF.</div>
+              <div class="file-upload__name"></div>
+              <div class="file-upload__warning">Photo will be converted to PDF</div>
+            </div>
+            <div class="error-msg">Building deed is required</div>
+          </div>
+
+          <div class="field-group">
+            <label>Certificate of Occupancy <span class="req">*</span></label>
+            <div class="file-upload" data-upload="certOccupancy">
+              <input type="file" name="certOccupancy" accept=".pdf,.jpg,.jpeg,.png" required>
+              <div class="file-upload__icon">&#8682;</div>
+              <div class="file-upload__text">Drag files here or <strong>browse</strong></div>
+              <div class="file-upload__hint">PDF, JPG, or PNG. Photos will be converted to PDF.</div>
+              <div class="file-upload__name"></div>
+              <div class="file-upload__warning">Photo will be converted to PDF</div>
+            </div>
+            <div class="error-msg">Certificate of occupancy is required</div>
+          </div>
+
+          <div class="field-group">
+            <label for="yearBuilt">Year Building Was Constructed <span class="req">*</span></label>
+            <select id="yearBuilt" name="yearBuilt" required>
+              <option value="">Select year</option>
+              <!-- Years populated by JavaScript (2026 down to 1900) -->
+            </select>
+            <div class="error-msg">Year is required</div>
+          </div>
+
+          <div class="field-row-3 field-group">
+            <div class="field-group">
+              <label for="residentialUnits">Residential Units <span class="req">*</span></label>
+              <input type="number" id="residentialUnits" name="residentialUnits" required placeholder="0" min="0">
+              <div class="error-msg">Required</div>
+            </div>
+            <div class="field-group">
+              <label for="commercialUnits">Commercial Units</label>
+              <input type="number" id="commercialUnits" name="commercialUnits" placeholder="0" min="0">
+            </div>
+            <div class="field-group">
+              <label for="totalStories">Total Stories <span class="req">*</span></label>
+              <select id="totalStories" name="totalStories" required>
+                <option value="">Select</option>
+                <!-- 1 through 50 populated by JavaScript -->
+              </select>
+              <div class="error-msg">Required</div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>Are there rent-stabilized units in this building? <span class="req">*</span></label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="rentStabYes" name="rentStabilized" value="Yes" required>
+                <label for="rentStabYes">Yes</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="rentStabNo" name="rentStabilized" value="No">
+                <label for="rentStabNo">No</label>
+              </div>
+            </div>
+            <div class="error-msg">Please select an option</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Utility Details</div>
+          <p class="helper" style="margin-top:-12px; margin-bottom:20px;">Select who pays for each utility and the type where applicable.</p>
+
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="utilHeating">Heating <span class="req">*</span></label>
+              <select id="utilHeating" name="utilHeating" required>
+                <option value="">Select</option>
+                <option value="Electric - Paid by Tenant">Electric - Paid by Tenant</option>
+                <option value="Electric - Paid by Owner">Electric - Paid by Owner</option>
+                <option value="Gas - Paid by Tenant">Gas - Paid by Tenant</option>
+                <option value="Gas - Paid by Owner">Gas - Paid by Owner</option>
+                <option value="Oil - Paid by Owner">Oil - Paid by Owner</option>
+                <option value="Steam - Paid by Owner">Steam - Paid by Owner</option>
+              </select>
+              <div class="error-msg">Required</div>
+            </div>
+            <div class="field-group">
+              <label for="utilCooking">Cooking <span class="req">*</span></label>
+              <select id="utilCooking" name="utilCooking" required>
+                <option value="">Select</option>
+                <option value="Electric - Paid by Tenant">Electric - Paid by Tenant</option>
+                <option value="Electric - Paid by Owner">Electric - Paid by Owner</option>
+                <option value="Gas - Paid by Tenant">Gas - Paid by Tenant</option>
+                <option value="Gas - Paid by Owner">Gas - Paid by Owner</option>
+              </select>
+              <div class="error-msg">Required</div>
+            </div>
+          </div>
+
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="utilHotWater">Hot Water <span class="req">*</span></label>
+              <select id="utilHotWater" name="utilHotWater" required>
+                <option value="">Select</option>
+                <option value="Electric - Paid by Tenant">Electric - Paid by Tenant</option>
+                <option value="Electric - Paid by Owner">Electric - Paid by Owner</option>
+                <option value="Gas - Paid by Tenant">Gas - Paid by Tenant</option>
+                <option value="Gas - Paid by Owner">Gas - Paid by Owner</option>
+              </select>
+              <div class="error-msg">Required</div>
+            </div>
+            <div class="field-group">
+              <label for="utilElectric">Other Electric <span class="req">*</span></label>
+              <select id="utilElectric" name="utilElectric" required>
+                <option value="">Select</option>
+                <option value="Paid by Tenant">Paid by Tenant</option>
+                <option value="Paid by Owner">Paid by Owner</option>
+                <option value="Split">Split</option>
+              </select>
+              <div class="error-msg">Required</div>
+            </div>
+          </div>
+
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="utilWater">Water <span class="req">*</span></label>
+              <select id="utilWater" name="utilWater" required>
+                <option value="">Select</option>
+                <option value="Paid by Tenant">Paid by Tenant</option>
+                <option value="Paid by Owner">Paid by Owner</option>
+              </select>
+              <div class="error-msg">Required</div>
+            </div>
+            <div class="field-group">
+              <label for="utilSewer">Sewer <span class="req">*</span></label>
+              <select id="utilSewer" name="utilSewer" required>
+                <option value="">Select</option>
+                <option value="Paid by Tenant">Paid by Tenant</option>
+                <option value="Paid by Owner">Paid by Owner</option>
+              </select>
+              <div class="error-msg">Required</div>
+            </div>
+          </div>
+
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="utilTrash">Trash Collection <span class="req">*</span></label>
+              <select id="utilTrash" name="utilTrash" required>
+                <option value="">Select</option>
+                <option value="Paid by Tenant">Paid by Tenant</option>
+                <option value="Paid by Owner">Paid by Owner</option>
+              </select>
+              <div class="error-msg">Required</div>
+            </div>
+            <div class="field-group">
+              <label for="utilAC">Air Conditioning <span class="req">*</span></label>
+              <select id="utilAC" name="utilAC" required>
+                <option value="">Select</option>
+                <option value="Paid by Tenant">Paid by Tenant</option>
+                <option value="Paid by Owner">Paid by Owner</option>
+                <option value="N/A">N/A</option>
+              </select>
+              <div class="error-msg">Required</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-nav">
+          <button type="button" class="btn-prev" onclick="prevStep()">
+            <span class="btn-arrow">&larr;</span> Back
+          </button>
+          <button type="button" class="btn-next" onclick="nextStep()">
+            Continue <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== STEP 4: Units for Rent ==================== -->
+      <div class="form-step" data-step="3">
+
+        <div class="section">
+          <div class="section-title">Units for Rent</div>
+          <p class="helper" style="margin-top:-12px; margin-bottom:20px;">Add each unit available for rent. Provide the unit number, floor, bedroom count, and new legal rent amount.</p>
+
+          <div id="unitRows">
+            <!-- First unit row rendered by JavaScript -->
+          </div>
+
+          <button type="button" class="btn-add-unit" id="addUnitBtn" onclick="addUnitRow()">
+            + Add Another Unit
+          </button>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Additional Details</div>
+
+          <div class="field-group">
+            <label>Is this a lottery unit? <span class="req">*</span></label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="lotteryYes" name="isLottery" value="Yes" required>
+                <label for="lotteryYes">Yes</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="lotteryNo" name="isLottery" value="No">
+                <label for="lotteryNo">No</label>
+              </div>
+            </div>
+            <div class="error-msg">Please select an option</div>
+          </div>
+
+          <div class="field-group">
+            <label>Workbook</label>
+            <p class="helper" style="margin-top:-4px; margin-bottom:10px;">Optional -- upload any supporting spreadsheets or documents.</p>
+            <div class="file-upload" data-upload="workbook">
+              <input type="file" name="workbook" accept=".pdf,.xlsx,.xls,.csv,.doc,.docx,.jpg,.jpeg,.png">
+              <div class="file-upload__icon">&#8682;</div>
+              <div class="file-upload__text">Drag files here or <strong>browse</strong></div>
+              <div class="file-upload__hint">PDF, Excel, CSV, Word, or image files accepted.</div>
+              <div class="file-upload__name"></div>
+              <div class="file-upload__warning">Photo will be converted to PDF</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-nav">
+          <button type="button" class="btn-prev" onclick="prevStep()">
+            <span class="btn-arrow">&larr;</span> Back
+          </button>
+          <button type="button" class="btn-next" onclick="nextStep()">
+            Continue <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== STEP 5: Payment Information for Tenants ==================== -->
+      <div class="form-step" data-step="4">
+
+        <div class="section">
+          <div class="section-title">Tenant Rent Payment Methods</div>
+          <p class="helper" style="margin-top:-12px; margin-bottom:20px;">Select how tenants can pay rent. Provide details for each method selected.</p>
+
+          <div class="field-group">
+            <label>Preferred Payment Methods <span class="req">*</span></label>
+            <div class="checkbox-group">
+              <div class="checkbox-option">
+                <input type="checkbox" id="payCheck" name="paymentMethods" value="Check" data-toggle="checkFields">
+                <label for="payCheck">Check / Money Order</label>
+              </div>
+              <div class="checkbox-option">
+                <input type="checkbox" id="payZelle" name="paymentMethods" value="Zelle" data-toggle="zelleFields">
+                <label for="payZelle">Zelle</label>
+              </div>
+              <div class="checkbox-option">
+                <input type="checkbox" id="payACH" name="paymentMethods" value="ACH" data-toggle="achFields">
+                <label for="payACH">ACH Transaction</label>
+              </div>
+            </div>
+            <div class="error-msg">Please select at least one payment method</div>
+          </div>
+
+          <!-- Check / Money Order Details -->
+          <div class="conditional" id="checkFields">
+            <div class="field-group">
+              <label for="checkPayable">Check Payable To <span class="req">*</span></label>
+              <input type="text" id="checkPayable" name="checkPayable" placeholder="Name checks should be made out to">
+              <div class="error-msg">Payable name is required</div>
+            </div>
+
+            <div class="field-group" style="position:relative;">
+              <label for="checkAddress">Mailing Address <span class="req">*</span></label>
+              <input type="text" id="checkAddress" name="checkAddress" placeholder="Start typing to search..." autocomplete="off">
+              <div class="autosuggest" id="checkAddressSuggest"></div>
+            </div>
+
+            <div class="field-row-3 field-group">
+              <div class="field-group">
+                <label for="checkCity">City</label>
+                <input type="text" id="checkCity" name="checkCity" placeholder="City">
+              </div>
+              <div class="field-group">
+                <label for="checkState">State</label>
+                <select id="checkState" name="checkState">
+                  <option value="">Select</option>
+                  <option value="NY">New York</option>
+                  <option value="NJ">New Jersey</option>
+                  <option value="CT">Connecticut</option>
+                  <option value="PA">Pennsylvania</option>
+                  <option value="AL">Alabama</option>
+                  <option value="AK">Alaska</option>
+                  <option value="AZ">Arizona</option>
+                  <option value="AR">Arkansas</option>
+                  <option value="CA">California</option>
+                  <option value="CO">Colorado</option>
+                  <option value="DE">Delaware</option>
+                  <option value="FL">Florida</option>
+                  <option value="GA">Georgia</option>
+                  <option value="HI">Hawaii</option>
+                  <option value="ID">Idaho</option>
+                  <option value="IL">Illinois</option>
+                  <option value="IN">Indiana</option>
+                  <option value="IA">Iowa</option>
+                  <option value="KS">Kansas</option>
+                  <option value="KY">Kentucky</option>
+                  <option value="LA">Louisiana</option>
+                  <option value="ME">Maine</option>
+                  <option value="MD">Maryland</option>
+                  <option value="MA">Massachusetts</option>
+                  <option value="MI">Michigan</option>
+                  <option value="MN">Minnesota</option>
+                  <option value="MS">Mississippi</option>
+                  <option value="MO">Missouri</option>
+                  <option value="MT">Montana</option>
+                  <option value="NE">Nebraska</option>
+                  <option value="NV">Nevada</option>
+                  <option value="NH">New Hampshire</option>
+                  <option value="NM">New Mexico</option>
+                  <option value="NC">North Carolina</option>
+                  <option value="ND">North Dakota</option>
+                  <option value="OH">Ohio</option>
+                  <option value="OK">Oklahoma</option>
+                  <option value="OR">Oregon</option>
+                  <option value="RI">Rhode Island</option>
+                  <option value="SC">South Carolina</option>
+                  <option value="SD">South Dakota</option>
+                  <option value="TN">Tennessee</option>
+                  <option value="TX">Texas</option>
+                  <option value="UT">Utah</option>
+                  <option value="VT">Vermont</option>
+                  <option value="VA">Virginia</option>
+                  <option value="WA">Washington</option>
+                  <option value="WV">West Virginia</option>
+                  <option value="WI">Wisconsin</option>
+                  <option value="WY">Wyoming</option>
+                  <option value="DC">Washington DC</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="checkZip">Zip Code</label>
+                <input type="text" id="checkZip" name="checkZip" placeholder="Zip" maxlength="10">
+              </div>
+            </div>
+          </div>
+
+          <!-- Zelle Details -->
+          <div class="conditional" id="zelleFields">
+            <div class="field-row field-group">
+              <div class="field-group">
+                <label for="zellePhone">Zelle Phone Number <span class="req">*</span></label>
+                <input type="tel" id="zellePhone" name="zellePhone" placeholder="(555) 555-5555">
+                <div class="error-msg">Phone number is required</div>
+              </div>
+              <div class="field-group">
+                <label for="zelleEmail">Zelle Email Address <span class="req">*</span></label>
+                <input type="email" id="zelleEmail" name="zelleEmail" placeholder="email@example.com">
+                <div class="error-msg">Email is required</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACH Details -->
+          <div class="conditional" id="achFields">
+            <div class="field-row field-group">
+              <div class="field-group">
+                <label for="achAccount">ACH Account Number <span class="req">*</span></label>
+                <input type="text" id="achAccount" name="achAccount" placeholder="Account number">
+                <div class="error-msg">Account number is required</div>
+              </div>
+              <div class="field-group">
+                <label for="achRouting">ACH Routing Number <span class="req">*</span></label>
+                <input type="text" id="achRouting" name="achRouting" placeholder="Routing number" maxlength="9">
+                <div class="error-msg">Routing number is required</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Point of Contact for Tenants</div>
+
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="pocFirstName">First Name <span class="req">*</span></label>
+              <input type="text" id="pocFirstName" name="pocFirstName" required placeholder="First name">
+              <div class="error-msg">First name is required</div>
+            </div>
+            <div class="field-group">
+              <label for="pocLastName">Last Name <span class="req">*</span></label>
+              <input type="text" id="pocLastName" name="pocLastName" required placeholder="Last name">
+              <div class="error-msg">Last name is required</div>
+            </div>
+          </div>
+
+          <div class="field-row field-group">
+            <div class="field-group">
+              <label for="pocPhone">Phone Number <span class="req">*</span></label>
+              <input type="tel" id="pocPhone" name="pocPhone" required placeholder="(555) 555-5555">
+              <div class="error-msg">Phone number is required</div>
+            </div>
+            <div class="field-group">
+              <label for="pocEmail">Email Address <span class="req">*</span></label>
+              <input type="email" id="pocEmail" name="pocEmail" required placeholder="email@example.com">
+              <div class="error-msg">Valid email is required</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-nav">
+          <button type="button" class="btn-prev" onclick="prevStep()">
+            <span class="btn-arrow">&larr;</span> Back
+          </button>
+          <button type="button" class="btn-next" onclick="nextStep()">
+            Continue <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== STEP 6: Submission & Signature ==================== -->
+      <div class="form-step" data-step="5">
+
+        <div class="section">
+          <div class="section-title">Submission</div>
+
+          <div class="field-group">
+            <label for="submitterName">Name <span class="req">*</span></label>
+            <input type="text" id="submitterName" name="submitterName" required placeholder="Full name of person submitting">
+            <div class="error-msg">Name is required</div>
+          </div>
+
+          <div class="field-group">
+            <label for="submitterTitle">Title <span class="req">*</span></label>
+            <select id="submitterTitle" name="submitterTitle" required>
+              <option value="">Select your title</option>
+              <option value="Owner">Owner</option>
+              <option value="Property Manager">Property Manager</option>
+              <option value="Assistant Manager">Assistant Manager</option>
+              <option value="Managing Agent">Managing Agent</option>
+              <option value="Authorized Representative">Authorized Representative</option>
+              <option value="Other">Other</option>
+            </select>
+            <div class="error-msg">Title is required</div>
+          </div>
+
+          <div class="field-group">
+            <div class="sig-label">
+              <label>Signature <span class="req">*</span></label>
+              <span class="sig-hint">Draw your signature below</span>
+            </div>
+            <div class="signature-pad-wrapper" id="sigWrap1">
+              <canvas id="sig1"></canvas>
+              <div class="sig-placeholder">Sign here</div>
+            </div>
+            <div class="sig-actions">
+              <button type="button" class="sig-btn" data-action="undo" data-pad="sig1">Undo</button>
+              <button type="button" class="sig-btn" data-action="clear" data-pad="sig1">Clear</button>
+            </div>
+            <input type="hidden" name="signature1" id="sig1Data">
+            <div class="error-msg">Signature is required</div>
+          </div>
+
+          <div class="field-group">
+            <label for="submissionDate">Date</label>
+            <input type="text" id="submissionDate" name="submissionDate" readonly>
+          </div>
+        </div>
+
+        <div class="form-nav">
+          <button type="button" class="btn-prev" onclick="prevStep()">
+            <span class="btn-arrow">&larr;</span> Back
+          </button>
+          <button type="button" class="btn-submit" id="submitBtn" onclick="submitForm()">
+            Submit Application <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </form>
+
+  <!-- Success Screen -->
+  <div class="success-screen" id="successScreen">
+    <div class="form-container">
+      <div class="success-icon">&#10003;</div>
+      <h2>Form Submitted</h2>
+      <p>Thank you for submitting your landlord information. Our team will review your property details and contact you shortly regarding the next steps.</p>
+      <a href="index.html" class="btn-home">Return to Homepage <span class="btn-arrow">&rarr;</span></a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="form-footer">
+    <p>&copy; 2026 Global Realty Development. All rights reserved.</p>
+    <p style="margin-top:6px;">
+      <a href="index.html">Home</a> &nbsp;&middot;&nbsp;
+      <a href="listings.html">Properties</a> &nbsp;&middot;&nbsp;
+      <a href="contact.html">Contact</a>
+    </p>
+  </footer>
+
+  <script>
+    /* ============================================
+       LANDLORD INTAKE FORM - APPLICATION LOGIC
+       Multi-step wizard with validation, conditional
+       fields, file uploads, address autocomplete via
+       Nominatim, photo-to-PDF, and signature pad.
+       ============================================ */
+
+    // --- State ---
+    /** Current step index (0-based) */
+    let currentStep = 0;
+    /** Total number of form steps */
+    const totalSteps = 6;
+    /** Display names for each step shown in the progress bar */
+    const stepNames = [
+      'Property & Ownership',
+      'Contacts & Mailing',
+      'Building Details',
+      'Units for Rent',
+      'Tenant Payment Info',
+      'Submission & Signature'
+    ];
+    /** Counter for dynamically added unit rows */
+    let unitCounter = 0;
+
+    // =============================================
+    // SIGNATURE PAD
+    // =============================================
+
+    /** Stores SignaturePad instances keyed by canvas ID */
+    const sigPads = {};
+
+    /**
+     * Initializes all signature pad canvases on the page.
+     * Handles high-DPI scaling, undo/clear buttons, and
+     * resize events to preserve drawn signature data.
+     */
+    function initSignaturePads() {
+      ['sig1'].forEach(id => {
+        const canvas = document.getElementById(id);
+        if (!canvas) return;
+        const wrapper = canvas.parentElement;
+
+        /** Resizes canvas for high-DPI displays */
+        function resizeCanvas() {
+          const ratio = Math.max(window.devicePixelRatio || 1, 1);
+          canvas.width = wrapper.offsetWidth * ratio;
+          canvas.height = wrapper.offsetHeight * ratio;
+          canvas.getContext('2d').scale(ratio, ratio);
+          canvas.style.width = wrapper.offsetWidth + 'px';
+          canvas.style.height = wrapper.offsetHeight + 'px';
+        }
+
+        resizeCanvas();
+
+        const pad = new SignaturePad(canvas, {
+          backgroundColor: 'rgba(247, 247, 247, 1)',
+          penColor: '#1A1A1A',
+          minWidth: 1,
+          maxWidth: 2.5,
+        });
+
+        pad.addEventListener('beginStroke', () => {
+          wrapper.classList.add('has-sig');
+        });
+
+        sigPads[id] = pad;
+
+        window.addEventListener('resize', () => {
+          const data = pad.toData();
+          resizeCanvas();
+          pad.fromData(data);
+        });
+      });
+
+      /* Undo and clear buttons for signature pads */
+      document.querySelectorAll('.sig-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const padId = btn.dataset.pad;
+          const action = btn.dataset.action;
+          const pad = sigPads[padId];
+          const wrapper = document.getElementById(padId).parentElement;
+
+          if (action === 'undo') {
+            const data = pad.toData();
+            if (data.length > 0) {
+              data.pop();
+              pad.fromData(data);
+              if (data.length === 0) wrapper.classList.remove('has-sig');
+            }
+          } else if (action === 'clear') {
+            pad.clear();
+            wrapper.classList.remove('has-sig');
+          }
+        });
+      });
+    }
+
+    // =============================================
+    // PROGRESS BAR
+    // =============================================
+
+    /**
+     * Updates the progress bar segments and step label
+     * to reflect the current step position.
+     */
+    function updateProgress() {
+      const segs = document.querySelectorAll('.progress-seg');
+      segs.forEach((seg, i) => {
+        seg.classList.remove('active', 'completed');
+        if (i < currentStep) seg.classList.add('completed');
+        if (i === currentStep) seg.classList.add('active');
+      });
+      document.getElementById('stepCount').textContent = `Step ${currentStep + 1} of ${totalSteps}`;
+      document.getElementById('stepName').textContent = stepNames[currentStep];
+    }
+
+    // =============================================
+    // STEP NAVIGATION
+    // =============================================
+
+    /**
+     * Shows a specific form step with directional animation.
+     * @param {number} index - The step index to display (0-based)
+     * @param {string} direction - 'forward' or 'back' for animation direction
+     */
+    function showStep(index, direction) {
+      const steps = document.querySelectorAll('.form-step');
+      steps.forEach(s => s.classList.remove('active', 'reverse'));
+
+      const target = steps[index];
+      if (direction === 'back') target.classList.add('reverse');
+      target.classList.add('active');
+
+      currentStep = index;
+      updateProgress();
+
+      document.getElementById('progressWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /**
+     * Advances to the next step after validating the current one.
+     * Does nothing if validation fails.
+     */
+    function nextStep() {
+      if (!validateStep(currentStep)) return;
+      if (currentStep < totalSteps - 1) {
+        showStep(currentStep + 1, 'forward');
+      }
+    }
+
+    /**
+     * Goes back to the previous step without validation.
+     */
+    function prevStep() {
+      if (currentStep > 0) {
+        showStep(currentStep - 1, 'back');
+      }
+    }
+
+    // =============================================
+    // VALIDATION
+    // =============================================
+
+    /**
+     * Validates all required fields in the given step.
+     * Checks text inputs, selects, radio groups, checkboxes,
+     * file uploads, confirmation fields, and signature pads.
+     * @param {number} stepIndex - The step to validate (0-based)
+     * @returns {boolean} True if all validations pass
+     */
+    function validateStep(stepIndex) {
+      const step = document.querySelectorAll('.form-step')[stepIndex];
+      let valid = true;
+
+      /* Clear previous error states */
+      step.querySelectorAll('.field-group.has-error').forEach(fg => {
+        fg.classList.remove('has-error', 'shake');
+      });
+
+      /* Validate text/email/tel/number inputs marked required */
+      step.querySelectorAll('input[required]:not([type="radio"]):not([type="checkbox"]):not([type="file"]):not([type="hidden"])').forEach(input => {
+        const conditional = input.closest('.conditional');
+        if (conditional && !conditional.classList.contains('visible')) return;
+
+        const fg = input.closest('.field-group');
+        if (!fg) return;
+
+        if (!input.value.trim()) {
+          fg.classList.add('has-error', 'shake');
+          valid = false;
+        } else if (input.type === 'email' && !input.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+          fg.classList.add('has-error', 'shake');
+          valid = false;
+        }
+      });
+
+      /* Validate required selects */
+      step.querySelectorAll('select[required]').forEach(select => {
+        const conditional = select.closest('.conditional');
+        if (conditional && !conditional.classList.contains('visible')) return;
+
+        const fg = select.closest('.field-group');
+        if (!select.value) {
+          fg.classList.add('has-error', 'shake');
+          valid = false;
+        }
+      });
+
+      /* Validate required radio groups */
+      const radioGroups = new Set();
+      step.querySelectorAll('input[type="radio"][required]').forEach(radio => {
+        radioGroups.add(radio.name);
+      });
+
+      radioGroups.forEach(name => {
+        const checked = step.querySelector(`input[name="${name}"]:checked`);
+        if (!checked) {
+          const radios = step.querySelectorAll(`input[name="${name}"]`);
+          const fg = radios[0].closest('.field-group');
+          if (fg) {
+            fg.classList.add('has-error', 'shake');
+            valid = false;
+          }
+        }
+      });
+
+      /* Validate required file uploads */
+      step.querySelectorAll('.file-upload input[type="file"][required]').forEach(input => {
+        const conditional = input.closest('.conditional');
+        if (conditional && !conditional.classList.contains('visible')) return;
+
+        if (input.files.length === 0) {
+          const fg = input.closest('.field-group');
+          if (fg) {
+            fg.classList.add('has-error', 'shake');
+            valid = false;
+          }
+        }
+      });
+
+      /* Step 0: Validate confirmation fields match */
+      if (stepIndex === 0) {
+        const acct = document.getElementById('bankAcct');
+        const acctConfirm = document.getElementById('bankAcctConfirm');
+        if (acct.value && acctConfirm.value && acct.value !== acctConfirm.value) {
+          const fg = acctConfirm.closest('.field-group');
+          fg.classList.add('has-error', 'shake');
+          valid = false;
+        }
+
+        const routing = document.getElementById('bankRouting');
+        const routingConfirm = document.getElementById('bankRoutingConfirm');
+        if (routing.value && routingConfirm.value && routing.value !== routingConfirm.value) {
+          const fg = routingConfirm.closest('.field-group');
+          fg.classList.add('has-error', 'shake');
+          valid = false;
+        }
+
+        /* Validate Other bank name if "Other" is selected */
+        const bankSelect = document.getElementById('bankName');
+        if (bankSelect.value === 'Other') {
+          const otherInput = document.getElementById('bankNameOther');
+          if (!otherInput.value.trim()) {
+            const fg = otherInput.closest('.field-group');
+            fg.classList.add('has-error', 'shake');
+            valid = false;
+          }
+        }
+      }
+
+      /* Step 4: Validate payment method checkboxes */
+      if (stepIndex === 4) {
+        const checked = step.querySelectorAll('input[name="paymentMethods"]:checked');
+        if (checked.length === 0) {
+          const fg = step.querySelector('input[name="paymentMethods"]').closest('.field-group');
+          fg.classList.add('has-error', 'shake');
+          valid = false;
+        }
+      }
+
+      /* Step 5: Validate signature */
+      if (stepIndex === 5) {
+        if (sigPads['sig1'] && sigPads['sig1'].isEmpty()) {
+          const wrapper = document.getElementById('sig1').parentElement;
+          const fg = wrapper.closest('.field-group');
+          fg.classList.add('has-error', 'shake');
+          valid = false;
+        }
+      }
+
+      /* Scroll to first error if validation failed */
+      if (!valid) {
+        const firstError = step.querySelector('.field-group.has-error');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+
+      return valid;
+    }
+
+    // =============================================
+    // CONDITIONAL FIELDS
+    // =============================================
+
+    /**
+     * Sets up show/hide logic for conditional form sections.
+     * Radio buttons with data-toggle show/hide their target.
+     * Checkboxes with data-toggle toggle their target visibility.
+     * Also handles the "Other" bank name conditional.
+     */
+    function initConditionalFields() {
+      /* Radio-based toggles */
+      document.querySelectorAll('[data-toggle]').forEach(input => {
+        if (input.type === 'checkbox') return;
+        input.addEventListener('change', () => {
+          const targetId = input.dataset.toggle;
+          const target = document.getElementById(targetId);
+          if (!target) return;
+
+          const shouldHide = input.dataset.hide === 'true';
+          if (shouldHide) {
+            target.classList.remove('visible');
+          } else {
+            target.classList.add('visible');
+          }
+        });
+      });
+
+      /* Checkbox-based toggles */
+      document.querySelectorAll('.checkbox-option input[data-toggle]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const targetId = cb.dataset.toggle;
+          const target = document.getElementById(targetId);
+          if (!target) return;
+
+          if (cb.checked) {
+            target.classList.add('visible');
+          } else {
+            target.classList.remove('visible');
+          }
+        });
+      });
+
+      /* Bank name "Other" conditional */
+      const bankSelect = document.getElementById('bankName');
+      if (bankSelect) {
+        bankSelect.addEventListener('change', () => {
+          const otherField = document.getElementById('otherBankField');
+          if (bankSelect.value === 'Other') {
+            otherField.classList.add('visible');
+          } else {
+            otherField.classList.remove('visible');
+          }
+        });
+      }
+    }
+
+    // =============================================
+    // DYNAMIC UNIT ROWS
+    // =============================================
+
+    /**
+     * Adds a new unit row to the Units for Rent section.
+     * Each row has unit number, floor, bedrooms, rent, and
+     * a remove button (except the first row).
+     */
+    function addUnitRow() {
+      const container = document.getElementById('unitRows');
+      const maxUnits = 20;
+
+      if (unitCounter >= maxUnits) return;
+
+      unitCounter++;
+      const index = unitCounter;
+      const isFirst = container.children.length === 0;
+
+      const row = document.createElement('div');
+      row.className = 'unit-row';
+      row.dataset.unitIndex = index;
+
+      /* Build floor options from Basement through 20th floor */
+      let floorOptions = '<option value="">Floor</option><option value="Basement">Basement</option><option value="Ground">Ground</option>';
+      for (let f = 1; f <= 20; f++) {
+        const suffix = f === 1 ? 'st' : f === 2 ? 'nd' : f === 3 ? 'rd' : 'th';
+        floorOptions += `<option value="${f}">${f}${suffix}</option>`;
+      }
+
+      row.innerHTML = `
+        <div class="field-group">
+          <label for="unitNum${index}">Unit # <span class="req">*</span></label>
+          <input type="text" id="unitNum${index}" name="unit${index}Number" placeholder="e.g. 1A" required>
+          <div class="error-msg">Required</div>
+        </div>
+        <div class="field-group">
+          <label for="unitFloor${index}">Floor <span class="req">*</span></label>
+          <select id="unitFloor${index}" name="unit${index}Floor" required>
+            ${floorOptions}
+          </select>
+          <div class="error-msg">Required</div>
+        </div>
+        <div class="field-group">
+          <label for="unitBed${index}">Bedrooms <span class="req">*</span></label>
+          <select id="unitBed${index}" name="unit${index}Bedrooms" required>
+            <option value="">Beds</option>
+            <option value="Studio">Studio</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+          <div class="error-msg">Required</div>
+        </div>
+        <div class="field-group">
+          <label for="unitRent${index}">Legal Rent <span class="req">*</span></label>
+          <input type="text" id="unitRent${index}" name="unit${index}Rent" placeholder="$0.00" required>
+          <div class="error-msg">Required</div>
+        </div>
+        ${isFirst ? '<div></div>' : '<button type="button" class="unit-remove" onclick="removeUnitRow(this)" title="Remove unit">&times;</button>'}
+      `;
+
+      container.appendChild(row);
+
+      /* Attach currency formatting to the rent input */
+      const rentInput = row.querySelector(`#unitRent${index}`);
+      formatCurrencyInput(rentInput);
+
+      /* Update add button visibility */
+      if (container.children.length >= maxUnits) {
+        document.getElementById('addUnitBtn').style.display = 'none';
+      }
+    }
+
+    /**
+     * Removes a unit row from the Units section.
+     * @param {HTMLElement} btn - The remove button clicked
+     */
+    function removeUnitRow(btn) {
+      const row = btn.closest('.unit-row');
+      row.style.opacity = '0';
+      row.style.transform = 'translateY(-10px)';
+      row.style.transition = 'all 0.25s ease';
+      setTimeout(() => {
+        row.remove();
+        document.getElementById('addUnitBtn').style.display = '';
+      }, 250);
+    }
+
+    // =============================================
+    // FILE UPLOADS
+    // =============================================
+
+    /**
+     * Initializes file upload change handlers to show
+     * file names and photo-to-PDF conversion warnings.
+     */
+    function initFileUploads() {
+      document.querySelectorAll('.file-upload input[type="file"]').forEach(input => {
+        input.addEventListener('change', () => {
+          const wrapper = input.closest('.file-upload');
+          const nameEl = wrapper.querySelector('.file-upload__name');
+          const warningEl = wrapper.querySelector('.file-upload__warning');
+          const fg = wrapper.closest('.field-group');
+
+          if (input.files.length > 0) {
+            const file = input.files[0];
+            const isImage = file.type.startsWith('image/');
+
+            wrapper.classList.add('has-file');
+            nameEl.textContent = file.name;
+
+            if (isImage && warningEl) {
+              warningEl.style.display = 'block';
+            } else if (warningEl) {
+              warningEl.style.display = 'none';
+            }
+
+            if (fg) fg.classList.remove('has-error');
+          } else {
+            wrapper.classList.remove('has-file');
+            nameEl.textContent = '';
+            if (warningEl) warningEl.style.display = 'none';
+          }
+        });
+      });
+    }
+
+    // =============================================
+    // PHOTO TO PDF CONVERSION
+    // =============================================
+
+    /**
+     * Converts a JPG/PNG image file to a single-page PDF using jsPDF.
+     * @param {File} file - The image file to convert
+     * @returns {Promise<Blob>} A Blob containing the resulting PDF
+     */
+    async function convertImageToPDF(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+              orientation: img.width > img.height ? 'landscape' : 'portrait',
+              unit: 'px',
+              format: [img.width, img.height]
+            });
+            pdf.addImage(e.target.result, 'JPEG', 0, 0, img.width, img.height);
+            const blob = pdf.output('blob');
+            resolve(blob);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // =============================================
+    // NOMINATIM ADDRESS AUTOCOMPLETE
+    // =============================================
+
+    /** Timestamp of the last Nominatim API request (rate limiting) */
+    let lastNominatimRequest = 0;
+
+    /**
+     * Sets up Nominatim-based address autocomplete on an input field.
+     * Debounces 400ms, respects 1 req/sec rate limit per Nominatim policy.
+     * On selection, auto-fills associated city/state/zip fields.
+     *
+     * @param {string} inputId - The text input element ID
+     * @param {string} suggestId - The autosuggest dropdown element ID
+     * @param {string} cityId - The city input ID to auto-fill
+     * @param {string} stateId - The state select ID to auto-fill
+     * @param {string} zipId - The zip input ID to auto-fill
+     */
+    function initAddressAutocomplete(inputId, suggestId, cityId, stateId, zipId) {
+      const input = document.getElementById(inputId);
+      const suggest = document.getElementById(suggestId);
+      if (!input || !suggest) return;
+
+      let debounceTimer = null;
+      let highlightedIndex = -1;
+
+      input.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        const val = input.value.trim();
+
+        if (val.length < 3) {
+          suggest.classList.remove('open');
+          suggest.innerHTML = '';
+          return;
+        }
+
+        /* 400ms debounce before firing API request */
+        debounceTimer = setTimeout(() => {
+          const now = Date.now();
+          const timeSinceLast = now - lastNominatimRequest;
+          /* Enforce 1 request per second per Nominatim usage policy */
+          const delay = timeSinceLast < 1000 ? 1000 - timeSinceLast : 0;
+
+          setTimeout(() => {
+            lastNominatimRequest = Date.now();
+            fetchAddresses(val, input, suggest, cityId, stateId, zipId);
+          }, delay);
+        }, 400);
+      });
+
+      /* Keyboard navigation for the dropdown */
+      input.addEventListener('keydown', (e) => {
+        const items = suggest.querySelectorAll('.autosuggest__item');
+        if (!items.length) return;
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          highlightedIndex = Math.min(highlightedIndex + 1, items.length - 1);
+          items.forEach((it, i) => it.classList.toggle('highlighted', i === highlightedIndex));
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          highlightedIndex = Math.max(highlightedIndex - 1, 0);
+          items.forEach((it, i) => it.classList.toggle('highlighted', i === highlightedIndex));
+        } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+          e.preventDefault();
+          items[highlightedIndex].click();
+        } else if (e.key === 'Escape') {
+          suggest.classList.remove('open');
+        }
+      });
+
+      /* Close dropdown when clicking outside */
+      document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !suggest.contains(e.target)) {
+          suggest.classList.remove('open');
+        }
+      });
+    }
+
+    /**
+     * Fetches address suggestions from the Nominatim API and
+     * renders them in the autosuggest dropdown.
+     *
+     * @param {string} query - The user's search text
+     * @param {HTMLElement} input - The input element to fill on selection
+     * @param {HTMLElement} suggest - The dropdown container element
+     * @param {string} cityId - City input ID for auto-fill
+     * @param {string} stateId - State select ID for auto-fill
+     * @param {string} zipId - Zip input ID for auto-fill
+     */
+    async function fetchAddresses(query, input, suggest, cityId, stateId, zipId) {
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=us&limit=5&addressdetails=1&q=${encodeURIComponent(query)}`;
+        const response = await fetch(url, {
+          headers: { 'User-Agent': 'GlobalRealtyDev/1.0' }
+        });
+        const results = await response.json();
+
+        suggest.innerHTML = '';
+        highlightedIndex = -1;
+
+        if (results.length === 0) {
+          suggest.classList.remove('open');
+          return;
+        }
+
+        results.forEach((result, i) => {
+          const item = document.createElement('div');
+          item.className = 'autosuggest__item';
+          item.textContent = result.display_name;
+
+          item.addEventListener('click', () => {
+            /* Extract street-level address from the result */
+            const addr = result.address || {};
+            const houseNumber = addr.house_number || '';
+            const road = addr.road || '';
+            const streetAddress = (houseNumber + ' ' + road).trim();
+            input.value = streetAddress || result.display_name.split(',')[0];
+
+            /* Auto-fill city, state, and zip fields */
+            const cityInput = document.getElementById(cityId);
+            const stateSelect = document.getElementById(stateId);
+            const zipInput = document.getElementById(zipId);
+
+            if (cityInput) {
+              cityInput.value = addr.city || addr.town || addr.village || addr.hamlet || addr.county || '';
+            }
+
+            if (stateSelect && addr.state) {
+              /* Match state name to the select option values (2-letter codes) */
+              const stateMap = buildStateMap();
+              const stateCode = stateMap[addr.state.toLowerCase()];
+              if (stateCode) {
+                stateSelect.value = stateCode;
+              }
+            }
+
+            if (zipInput) {
+              zipInput.value = addr.postcode || '';
+            }
+
+            suggest.classList.remove('open');
+          });
+
+          suggest.appendChild(item);
+        });
+
+        suggest.classList.add('open');
+      } catch (err) {
+        /* Silently fail -- user can still type manually */
+        suggest.classList.remove('open');
+      }
+    }
+
+    /**
+     * Builds a lookup map from full US state names (lowercase)
+     * to their two-letter abbreviation codes.
+     * @returns {Object} Map of state name to abbreviation
+     */
+    function buildStateMap() {
+      return {
+        'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR',
+        'california': 'CA', 'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE',
+        'florida': 'FL', 'georgia': 'GA', 'hawaii': 'HI', 'idaho': 'ID',
+        'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA', 'kansas': 'KS',
+        'kentucky': 'KY', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD',
+        'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS',
+        'missouri': 'MO', 'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV',
+        'new hampshire': 'NH', 'new jersey': 'NJ', 'new mexico': 'NM', 'new york': 'NY',
+        'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH', 'oklahoma': 'OK',
+        'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
+        'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT',
+        'vermont': 'VT', 'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV',
+        'wisconsin': 'WI', 'wyoming': 'WY', 'district of columbia': 'DC'
+      };
+    }
+
+    // =============================================
+    // INPUT FORMATTING
+    // =============================================
+
+    /**
+     * Auto-formats a phone input as (XXX) XXX-XXXX on keyup.
+     * Strips non-digit characters, limits to 10 digits.
+     * @param {HTMLElement} input - The phone input element
+     */
+    function formatPhoneInput(input) {
+      input.addEventListener('input', () => {
+        let value = input.value.replace(/\D/g, '');
+        if (value.length > 10) value = value.slice(0, 10);
+
+        if (value.length >= 6) {
+          input.value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6)}`;
+        } else if (value.length >= 3) {
+          input.value = `(${value.slice(0, 3)}) ${value.slice(3)}`;
+        } else if (value.length > 0) {
+          input.value = `(${value}`;
+        }
+      });
+    }
+
+    /**
+     * Auto-formats a Tax ID / EIN input as XX-XXXXXXX.
+     * Strips non-digit characters, limits to 9 digits.
+     * @param {HTMLElement} input - The Tax ID input element
+     */
+    function formatTaxIdInput(input) {
+      input.addEventListener('input', () => {
+        let value = input.value.replace(/\D/g, '');
+        if (value.length > 9) value = value.slice(0, 9);
+
+        if (value.length > 2) {
+          input.value = value.slice(0, 2) + '-' + value.slice(2);
+        } else {
+          input.value = value;
+        }
+      });
+    }
+
+    /**
+     * Auto-formats a currency input with $ prefix and comma separators.
+     * Strips non-digit/decimal characters and formats on blur.
+     * @param {HTMLElement} input - The currency input element
+     */
+    function formatCurrencyInput(input) {
+      input.addEventListener('blur', () => {
+        let value = input.value.replace(/[^0-9.]/g, '');
+        if (!value) return;
+
+        const num = parseFloat(value);
+        if (isNaN(num)) return;
+
+        input.value = '$' + num.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      });
+
+      input.addEventListener('focus', () => {
+        let value = input.value.replace(/[^0-9.]/g, '');
+        input.value = value;
+      });
+    }
+
+    // =============================================
+    // VISIBILITY TOGGLE (for sensitive fields)
+    // =============================================
+
+    /**
+     * Initializes show/hide toggle buttons for password-type inputs.
+     * Toggles between type="password" and type="text".
+     */
+    function initVisibilityToggles() {
+      document.querySelectorAll('.toggle-visibility').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.target;
+          const input = document.getElementById(targetId);
+          if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = 'Hide';
+          } else {
+            input.type = 'password';
+            btn.textContent = 'Show';
+          }
+        });
+      });
+    }
+
+    // =============================================
+    // POPULATE DYNAMIC DROPDOWNS
+    // =============================================
+
+    /**
+     * Populates the "Year Built" dropdown with years from
+     * the current year down to 1900.
+     */
+    function populateYearDropdown() {
+      const select = document.getElementById('yearBuilt');
+      if (!select) return;
+      const currentYear = new Date().getFullYear();
+      for (let y = currentYear; y >= 1900; y--) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        select.appendChild(opt);
+      }
+    }
+
+    /**
+     * Populates the "Total Stories" dropdown with values 1 through 50.
+     */
+    function populateStoriesDropdown() {
+      const select = document.getElementById('totalStories');
+      if (!select) return;
+      for (let s = 1; s <= 50; s++) {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        select.appendChild(opt);
+      }
+    }
+
+    // =============================================
+    // FORM SUBMISSION
+    // =============================================
+
+    /**
+     * Validates the final step, collects all form data including
+     * signatures and file uploads (converting images to PDF),
+     * then submits. Currently simulates submission with a delay.
+     */
+    async function submitForm() {
+      if (!validateStep(currentStep)) return;
+
+      const btn = document.getElementById('submitBtn');
+      btn.classList.add('loading');
+      btn.textContent = 'Submitting...';
+
+      try {
+        const formData = new FormData(document.getElementById('landlordForm'));
+
+        /* Add signature data as base64 PNG */
+        if (sigPads['sig1'] && !sigPads['sig1'].isEmpty()) {
+          formData.set('sig1Data', sigPads['sig1'].toDataURL('image/png'));
+        }
+
+        /* Convert any image uploads to PDF */
+        const fileInputs = document.querySelectorAll('.file-upload input[type="file"]');
+        for (const input of fileInputs) {
+          if (input.files.length > 0) {
+            const file = input.files[0];
+            if (file.type.startsWith('image/')) {
+              const pdfBlob = await convertImageToPDF(file);
+              const pdfName = file.name.replace(/\.(jpg|jpeg|png)$/i, '.pdf');
+              formData.set(input.name, new File([pdfBlob], pdfName, { type: 'application/pdf' }));
+            }
+          }
+        }
+
+        /* TODO: POST formData to backend API
+        const response = await fetch('https://api.globalrealtydevelopment.com/landlord', {
+          method: 'POST',
+          body: formData
+        }); */
+
+        /* Simulate submission delay */
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        /* Show success screen */
+        document.getElementById('landlordForm').style.display = 'none';
+        document.getElementById('progressWrap').style.display = 'none';
+        document.getElementById('successScreen').classList.add('visible');
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      } catch (error) {
+        btn.classList.remove('loading');
+        btn.innerHTML = 'Submit Application <span class="btn-arrow">&rarr;</span>';
+        alert('There was an error submitting your form. Please try again.');
+      }
+    }
+
+    // =============================================
+    // MOBILE MENU & DROPDOWN
+    // =============================================
+
+    /**
+     * Initializes the mobile hamburger menu toggle.
+     * Opens/closes the nav overlay on mobile viewports.
+     */
+    function initMobileMenu() {
+      const toggle = document.querySelector('.nav__toggle');
+      const navLinks = document.querySelector('.nav__links');
+      if (!toggle || !navLinks) return;
+
+      toggle.addEventListener('click', () => {
+        toggle.classList.toggle('open');
+        navLinks.classList.toggle('open');
+        document.documentElement.classList.toggle('menu-open');
+      });
+
+      toggle.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle.click();
+        }
+      });
+
+      navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          if (link.closest('.nav__dropdown')) return;
+          toggle.classList.remove('open');
+          navLinks.classList.remove('open');
+          document.documentElement.classList.remove('menu-open');
+        });
+      });
+    }
+
+    /**
+     * Initializes the Apply dropdown in the navigation bar.
+     * Handles open/close on click and outside-click dismissal.
+     */
+    function initDropdown() {
+      const dropdown = document.querySelector('.nav__dropdown');
+      if (!dropdown) return;
+      const ddToggle = dropdown.querySelector('.nav__dropdown-toggle');
+
+      ddToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+      });
+
+      const navToggle = document.querySelector('.nav__toggle');
+      const navLinks = document.querySelector('.nav__links');
+      dropdown.querySelectorAll('.nav__dropdown-menu a').forEach(link => {
+        link.addEventListener('click', () => {
+          if (navToggle && navLinks) {
+            navToggle.classList.remove('open');
+            navLinks.classList.remove('open');
+            document.documentElement.classList.remove('menu-open');
+          }
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
+      });
+    }
+
+    // =============================================
+    // INITIALIZATION
+    // =============================================
+
+    /**
+     * Main initialization function. Runs on DOMContentLoaded.
+     * Sets up all form features: navigation, autocomplete,
+     * conditional fields, file uploads, signature pads,
+     * dropdowns, and input formatting.
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+      /* Navigation */
+      initMobileMenu();
+      initDropdown();
+
+      /* Populate dynamic dropdowns */
+      populateYearDropdown();
+      populateStoriesDropdown();
+
+      /* Add first unit row */
+      addUnitRow();
+
+      /* Address autocomplete for all address fields */
+      initAddressAutocomplete('propAddress', 'propAddressSuggest', 'propCity', 'propState', 'propZip');
+      initAddressAutocomplete('mailAddress', 'mailAddressSuggest', 'mailCity', 'mailState', 'mailZip');
+      initAddressAutocomplete('checkAddress', 'checkAddressSuggest', 'checkCity', 'checkState', 'checkZip');
+
+      /* Conditional fields (radio toggles, checkbox toggles, bank "Other") */
+      initConditionalFields();
+
+      /* File uploads */
+      initFileUploads();
+
+      /* Signature pad */
+      initSignaturePads();
+
+      /* Progress bar */
+      updateProgress();
+
+      /* Visibility toggles for sensitive inputs */
+      initVisibilityToggles();
+
+      /* Phone number auto-formatting */
+      document.querySelectorAll('input[type="tel"]').forEach(formatPhoneInput);
+
+      /* Tax ID auto-formatting */
+      const taxIdInput = document.getElementById('taxId');
+      if (taxIdInput) formatTaxIdInput(taxIdInput);
+
+      /* Set today's date on submission date field */
+      const dateField = document.getElementById('submissionDate');
+      if (dateField) {
+        const today = new Date();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        dateField.value = `${mm}/${dd}/${yyyy}`;
+      }
+
+      /* Progress bar click navigation (only to completed steps) */
+      document.querySelectorAll('.progress-seg').forEach(seg => {
+        seg.addEventListener('click', () => {
+          const step = parseInt(seg.dataset.step);
+          if (step < currentStep) {
+            showStep(step, 'back');
+          }
+        });
+      });
+
+      /* Clear error state on input interaction */
+      document.querySelectorAll('input, select, textarea').forEach(el => {
+        el.addEventListener('input', () => {
+          const fg = el.closest('.field-group');
+          if (fg) fg.classList.remove('has-error', 'shake');
+        });
+        el.addEventListener('change', () => {
+          const fg = el.closest('.field-group');
+          if (fg) fg.classList.remove('has-error', 'shake');
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -1225,7 +1225,7 @@
           <a class="nav__dropdown-toggle" role="button" tabindex="0">Apply <span class="nav__dropdown-arrow">&#9660;</span></a>
           <div class="nav__dropdown-menu">
             <a href="apply.html">Tenant Application</a>
-            <a class="coming-soon">Landlord Application <span>Coming Soon</span></a>
+            <a href="landlord.html">Landlord Application</a>
           </div>
         </div>
       </div>
@@ -2221,7 +2221,19 @@
             </div>
             <div class="field-group">
               <label for="occRel${i}">Relationship to You</label>
-              <input type="text" id="occRel${i}" name="occupant${i}Relationship" placeholder="e.g., Spouse, Child, Parent">
+              <select id="occRel${i}" name="occupant${i}Relationship">
+                <option value="">Select</option>
+                <option value="Spouse">Spouse</option>
+                <option value="Child">Child</option>
+                <option value="Parent">Parent</option>
+                <option value="Sibling">Sibling</option>
+                <option value="Grandparent">Grandparent</option>
+                <option value="Grandchild">Grandchild</option>
+                <option value="Partner">Partner</option>
+                <option value="Roommate">Roommate</option>
+                <option value="Other Family">Other Family</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
           </div>
         `;
