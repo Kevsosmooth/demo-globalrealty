@@ -38,18 +38,21 @@
    * Returns a placeholder image URL for a given index.
    * Cycles through the array if index exceeds length.
    */
+  /** Extracts a URL string from a photo object or string. */
+  function photoUrl(photo) {
+    if (typeof photo === 'string') return photo;
+    return photo.file_path || photo.url || '';
+  }
+
   function getImage(property, index) {
-    var firstUnitPhoto = null;
     if (property.photos && property.photos.length > 0) {
-      return property.photos[0].url || property.photos[0];
+      return photoUrl(property.photos[0]);
     }
     for (var i = 0; i < property.units.length; i++) {
       if (property.units[i].photos && property.units[i].photos.length > 0) {
-        firstUnitPhoto = property.units[i].photos[0].url || property.units[i].photos[0];
-        break;
+        return photoUrl(property.units[i].photos[0]);
       }
     }
-    if (firstUnitPhoto) return firstUnitPhoto;
     var images = LISTINGS_CONFIG.PLACEHOLDER_IMAGES;
     return images[index % images.length];
   }
@@ -89,10 +92,11 @@
       '<div class="property-card__meta-item">' + bathLabel + '</div>';
   }
 
-  /** Simple HTML entity escaping for user-supplied strings. */
+  /** Simple HTML entity escaping -- coerces to string first for safety. */
   function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    if (str === null || str === undefined) return '';
+    var s = String(str);
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   /**
