@@ -31,7 +31,12 @@ var FALLBACK_DATA = [
     laundry_in_building: true,
     super_on_site: true,
     pet_policy: "Cats and Dogs",
-    photos: [],
+    photos: [
+      {file_path: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80", file_name: "living-room.jpg"},
+      {file_path: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80", file_name: "kitchen.jpg"},
+      {file_path: "https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=1200&q=80", file_name: "bedroom.jpg"},
+      {file_path: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&q=80", file_name: "exterior.jpg"}
+    ],
     amenities: [{amenity_name: "Doorman", category: "Building"}, {amenity_name: "Gym", category: "Building"}, {amenity_name: "Package Room", category: "Building"}],
     units: [
       {id:"u1",unit_name:"2A",bedrooms:1,bathrooms:1,square_feet:650,rent_amount:2300,status:"Vacant",pet_friendly:true,renovated:false,photos:[],amenities:[{amenity_name:"Hardwood Floors",category:"Interior"}],description:"Cozy one-bedroom with natural light.",date_available:"2026-05-01"},
@@ -53,7 +58,11 @@ var FALLBACK_DATA = [
     parking: true,
     laundry_in_building: false,
     pet_policy: "Cats Only",
-    photos: [],
+    photos: [
+      {file_path: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&q=80", file_name: "living-room.jpg"},
+      {file_path: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&q=80", file_name: "kitchen.jpg"},
+      {file_path: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80", file_name: "exterior.jpg"}
+    ],
     amenities: [{amenity_name: "Driveway", category: "Parking"}, {amenity_name: "Backyard", category: "Outdoor"}],
     units: [
       {id:"u5",unit_name:"1F",bedrooms:1,bathrooms:1,square_feet:700,rent_amount:2150,status:"Vacant",renovated:true,photos:[],amenities:[{amenity_name:"Granite Countertops",category:"Kitchen"}],description:"Ground floor one-bedroom with private entrance.",date_available:"2026-04-15"},
@@ -71,7 +80,10 @@ var FALLBACK_DATA = [
     description: "Modern studio apartment in a quiet residential area.",
     elevator: false,
     parking: false,
-    photos: [],
+    photos: [
+      {file_path: "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=1200&q=80", file_name: "interior.jpg"},
+      {file_path: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=1200&q=80", file_name: "kitchen.jpg"}
+    ],
     amenities: [],
     units: [
       {id:"u7",unit_name:"Studio",bedrooms:0,bathrooms:1,square_feet:450,rent_amount:2604,status:"Vacant",photos:[],amenities:[],description:"Spacious studio with updated kitchen.",date_available:"2026-04-01"}
@@ -89,7 +101,10 @@ var FALLBACK_DATA = [
     elevator: true,
     parking: false,
     laundry_in_building: true,
-    photos: [],
+    photos: [
+      {file_path: "https://images.unsplash.com/photo-1558036117-15d82a90b9b1?w=1200&q=80", file_name: "living-room.jpg"},
+      {file_path: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80", file_name: "kitchen.jpg"}
+    ],
     amenities: [{amenity_name: "Laundry In-Building", category: "Laundry"}],
     units: [
       {id:"u8",unit_name:"2B",bedrooms:2,bathrooms:1,square_feet:850,rent_amount:2997,status:"Vacant",photos:[],amenities:[],description:"Two-bedroom with open layout.",date_available:"2026-04-15"}
@@ -106,7 +121,9 @@ var FALLBACK_DATA = [
     description: "Comfortable living near parks and transit.",
     elevator: false,
     parking: false,
-    photos: [],
+    photos: [
+      {file_path: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80", file_name: "interior.jpg"}
+    ],
     amenities: [],
     units: [
       {id:"u9",unit_name:"1A",bedrooms:1,bathrooms:1,square_feet:600,rent_amount:2150,status:"Vacant",photos:[],amenities:[{amenity_name:"Hardwood Floors",category:"Interior"}],description:"One-bedroom with hardwood floors.",date_available:"2026-05-01"}
@@ -124,7 +141,10 @@ var FALLBACK_DATA = [
     elevator: true,
     parking: false,
     laundry_in_building: true,
-    photos: [],
+    photos: [
+      {file_path: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80", file_name: "exterior.jpg"},
+      {file_path: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&q=80", file_name: "interior.jpg"}
+    ],
     amenities: [{amenity_name: "Storage", category: "Building"}],
     units: [
       {id:"u10",unit_name:"3C",bedrooms:3,bathrooms:2,square_feet:1100,rent_amount:3200,status:"Vacant",photos:[],amenities:[],description:"Three-bedroom near transit.",date_available:"2026-04-01"}

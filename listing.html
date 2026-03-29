@@ -25,11 +25,11 @@
     .property-breadcrumb a:hover { color: var(--color-orange); }
     .property-breadcrumb span { margin: 0 8px; opacity: 0.4; }
 
-    /* Building hero image */
+    /* Building hero image - compact */
     .listing-hero {
       width: 100%;
       aspect-ratio: 21 / 9;
-      max-height: 480px;
+      max-height: 300px;
       overflow: hidden;
       background: var(--color-charcoal);
     }
@@ -39,14 +39,34 @@
       object-fit: cover;
     }
 
-    /* Building header */
+    /* Thumbnail gallery strip below hero */
+    .listing-gallery {
+      display: flex;
+      gap: 4px;
+      padding: 4px 0;
+      background: var(--color-charcoal);
+    }
+    .listing-gallery__thumb {
+      height: 60px;
+      width: 80px;
+      object-fit: cover;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.3s;
+    }
+    .listing-gallery__thumb:hover,
+    .listing-gallery__thumb.active {
+      opacity: 1;
+    }
+
+    /* Building header - tighter padding */
     .listing-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       flex-wrap: wrap;
       gap: 24px;
-      padding: 40px 0 32px;
+      padding: 32px 0 20px;
     }
     .listing-header h1 {
       font-size: clamp(2rem, 4vw, 3rem);
@@ -69,10 +89,28 @@
       color: var(--color-gray-400);
     }
 
-    /* Building info grid */
+    /* Quick stats pills under header */
+    .listing-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-bottom: 24px;
+    }
+    .listing-stat {
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      background: var(--color-charcoal);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--color-gray-300);
+    }
+
+    /* Building info grid - description left, units right */
     .listing-info {
       display: grid;
-      grid-template-columns: 1.4fr 1fr;
+      grid-template-columns: 1fr 1.2fr;
       gap: 60px;
       padding-bottom: 60px;
     }
@@ -127,30 +165,23 @@
       flex-shrink: 0;
     }
 
-    /* Quick info sidebar card */
-    .listing-sidebar {
+    /* CTA buttons row */
+    .listing-cta {
       display: flex;
-      flex-direction: column;
-      gap: 24px;
+      gap: 12px;
+      margin-top: 32px;
+      flex-wrap: wrap;
     }
-    .sidebar-card {
-      background: var(--color-charcoal);
-      border: 1px solid rgba(255,255,255,0.06);
-      padding: 36px;
-    }
-    .sidebar-card h4 { margin-bottom: 24px; }
 
-    /* Units section */
+    /* Units section - inline in right column, no border */
     .units-section {
-      border-top: 1px solid rgba(255,255,255,0.06);
-      padding-top: 60px;
-      padding-bottom: 80px;
+      padding-bottom: 0;
     }
     .units-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 24px;
-      margin-top: 40px;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin-top: 24px;
     }
 
     /* Unit card */
@@ -259,6 +290,8 @@
       .listing-header { flex-direction: column; }
       .features-grid { grid-template-columns: 1fr; }
       .units-grid { grid-template-columns: 1fr; }
+      .listing-cta { flex-direction: column; }
+      .listing-cta .btn { width: 100%; justify-content: center; }
     }
   </style>
 </head>
@@ -304,12 +337,12 @@
 
   <!-- Skeleton shown while data loads -->
   <div id="listing-skeleton">
-    <!-- Skeleton hero image -->
-    <div class="skeleton-block" style="width:100%;height:400px;max-height:40vh;border-radius:0"></div>
+    <!-- Skeleton hero image (compact) -->
+    <div class="skeleton-block" style="width:100%;height:300px;max-height:30vh;border-radius:0"></div>
 
     <div class="container">
       <!-- Skeleton header -->
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:24px;padding:40px 0 32px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:24px;padding:32px 0 20px">
         <div>
           <div class="skeleton-line" style="width:320px;height:36px;margin-bottom:12px"></div>
           <div class="skeleton-line" style="width:200px;height:16px"></div>
@@ -317,8 +350,15 @@
         <div class="skeleton-line" style="width:180px;height:36px"></div>
       </div>
 
-      <!-- Skeleton body grid -->
-      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:60px;padding-bottom:60px">
+      <!-- Skeleton stats pills -->
+      <div style="display:flex;gap:10px;padding-bottom:24px">
+        <div class="skeleton-line" style="width:90px;height:30px;border-radius:0"></div>
+        <div class="skeleton-line" style="width:80px;height:30px;border-radius:0"></div>
+        <div class="skeleton-line" style="width:100px;height:30px;border-radius:0"></div>
+      </div>
+
+      <!-- Skeleton body grid: description left, units right -->
+      <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:60px;padding-bottom:60px">
         <div>
           <div class="skeleton-line" style="width:100%;height:16px;margin-bottom:10px"></div>
           <div class="skeleton-line" style="width:90%;height:16px;margin-bottom:10px"></div>
@@ -327,21 +367,12 @@
             <div class="skeleton-line" style="width:80px;height:30px;border-radius:0"></div>
             <div class="skeleton-line" style="width:100px;height:30px;border-radius:0"></div>
             <div class="skeleton-line" style="width:60px;height:30px;border-radius:0"></div>
-            <div class="skeleton-line" style="width:90px;height:30px;border-radius:0"></div>
           </div>
         </div>
         <div>
+          <div class="skeleton-line" style="width:200px;height:28px;margin-bottom:24px"></div>
+          <div class="skeleton-block" style="height:200px;border-radius:0;margin-bottom:20px"></div>
           <div class="skeleton-block" style="height:200px;border-radius:0"></div>
-        </div>
-      </div>
-
-      <!-- Skeleton units -->
-      <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:60px;padding-bottom:80px">
-        <div class="skeleton-line" style="width:200px;height:28px;margin-bottom:40px"></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px">
-          <div class="skeleton-block" style="height:220px;border-radius:0"></div>
-          <div class="skeleton-block" style="height:220px;border-radius:0"></div>
-          <div class="skeleton-block" style="height:220px;border-radius:0"></div>
         </div>
       </div>
     </div>
@@ -419,26 +450,50 @@
         return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       }
 
+      /** Maps raw property_type values to human-readable labels. */
+      function formatPropertyType(type) {
+        var map = {
+          'Single Family': 'Single Family Home',
+          'Two Family': 'Two Family Home',
+          'Three Family': 'Three Family Home',
+          'Four Family': 'Four Family Home',
+          'Apartment 5+': 'Apartment Building',
+          'Mixed Use 5+': 'Mixed Use Building',
+          'Commercial': 'Commercial Property'
+        };
+        return map[type] || type || '';
+      }
+
       /** Returns the hero image URL for the building. */
       function getHeroImage(property) {
         if (property.photos && property.photos.length > 0) {
-          var url = property.photos[0].url || property.photos[0];
-          /* Use high-res version for hero */
+          var url = property.photos[0].file_path || property.photos[0].url || property.photos[0];
           return url.replace('w=600', 'w=1200');
         }
         for (var i = 0; i < property.units.length; i++) {
           if (property.units[i].photos && property.units[i].photos.length > 0) {
-            var unitUrl = property.units[i].photos[0].url || property.units[i].photos[0];
+            var unitUrl = property.units[i].photos[0].file_path || property.units[i].photos[0].url || property.units[i].photos[0];
             return unitUrl.replace('w=600', 'w=1200');
           }
         }
-        /* Fallback: use the property index in FALLBACK_DATA to pick a placeholder */
         var idx = 0;
         for (var j = 0; j < FALLBACK_DATA.length; j++) {
           if (FALLBACK_DATA[j].id === property.id) { idx = j; break; }
         }
         return LISTINGS_CONFIG.PLACEHOLDER_IMAGES[idx % LISTINGS_CONFIG.PLACEHOLDER_IMAGES.length]
           .replace('w=600', 'w=1200');
+      }
+
+      /** Returns all building photo URLs for the gallery. */
+      function getAllPhotos(property) {
+        var photos = [];
+        if (property.photos && property.photos.length > 0) {
+          for (var i = 0; i < property.photos.length; i++) {
+            var url = property.photos[i].file_path || property.photos[i].url || property.photos[i];
+            photos.push(url.replace('w=600', 'w=1200'));
+          }
+        }
+        return photos;
       }
 
       /** Builds the building features list from boolean flags. */
@@ -503,9 +558,24 @@
         '</div>';
       }
 
+      /** Binds click handlers on gallery thumbnails to swap the hero image. */
+      function bindGalleryHandlers() {
+        var thumbs = contentEl.querySelectorAll('.listing-gallery__thumb');
+        var heroImg = contentEl.querySelector('.listing-hero img');
+        if (!heroImg || !thumbs.length) return;
+        for (var i = 0; i < thumbs.length; i++) {
+          thumbs[i].addEventListener('click', function () {
+            heroImg.src = this.src;
+            for (var j = 0; j < thumbs.length; j++) {
+              thumbs[j].classList.remove('active');
+            }
+            this.classList.add('active');
+          });
+        }
+      }
+
       /** Renders the full property detail page. */
       function renderProperty(property) {
-        /* Hide skeleton, show real content */
         var skeleton = document.getElementById('listing-skeleton');
         if (skeleton) skeleton.style.display = 'none';
         contentEl.style.display = '';
@@ -515,11 +585,35 @@
         breadcrumbEl.textContent = shortAddress;
 
         var heroImage = getHeroImage(property);
+        var allPhotos = getAllPhotos(property);
         var features = buildBuildingFeatures(property);
         var availableUnits = property.units.filter(function (u) {
           return u.status !== 'Occupied' && u.status !== 'occupied';
         });
         var totalUnits = property.units.length;
+
+        /* Gallery strip (only if more than 1 photo) */
+        var galleryHtml = '';
+        if (allPhotos.length > 1) {
+          galleryHtml = '<div class="listing-gallery">';
+          for (var g = 0; g < allPhotos.length; g++) {
+            var activeClass = (g === 0) ? ' active' : '';
+            galleryHtml += '<img src="' + escapeHtml(allPhotos[g]) + '" class="listing-gallery__thumb' + activeClass + '" alt="Photo ' + (g + 1) + '">';
+          }
+          galleryHtml += '</div>';
+        }
+
+        /* Quick stats pills */
+        var statsItems = [];
+        statsItems.push(totalUnits + ' Total Units');
+        statsItems.push(availableUnits.length + ' Available');
+        if (property.bed_range) statsItems.push(property.bed_range);
+        if (property.pet_policy) statsItems.push('Pets: ' + property.pet_policy);
+        var statsHtml = '<div class="listing-stats">';
+        for (var s = 0; s < statsItems.length; s++) {
+          statsHtml += '<span class="listing-stat">' + escapeHtml(statsItems[s]) + '</span>';
+        }
+        statsHtml += '</div>';
 
         /* Building amenities pills */
         var amenitiesHtml = '';
@@ -552,34 +646,18 @@
           unitsHtml += renderUnitCard(property.units[k]);
         }
 
-        /* Sidebar quick info items */
-        var sidebarItems = [
-          { label: 'Property Type', value: property.property_type || 'N/A' },
-          { label: 'Borough', value: property.borough || 'N/A' },
-          { label: 'Total Units', value: String(totalUnits) },
-          { label: 'Available', value: String(property.available_count || 0) },
-          { label: 'Price Range', value: property.price_range || 'N/A' },
-          { label: 'Bed Range', value: property.bed_range || 'N/A' }
-        ];
-        var sidebarHtml = '';
-        for (var m = 0; m < sidebarItems.length; m++) {
-          sidebarHtml += '<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);">' +
-            '<span style="font-size: 0.85rem; color: var(--color-gray-400);">' + sidebarItems[m].label + '</span>' +
-            '<span style="font-size: 0.85rem; color: var(--color-white); font-weight: 500;">' + escapeHtml(sidebarItems[m].value) + '</span>' +
-          '</div>';
-        }
-
         contentEl.innerHTML =
-          /* Hero image */
+          /* Hero image (compact) */
           '<div class="listing-hero">' +
             '<img src="' + escapeHtml(heroImage) + '" alt="' + escapeHtml(property.address) + '">' +
           '</div>' +
+          galleryHtml +
 
-          /* Header */
           '<div class="container">' +
+            /* Header: address, property type, borough, price */
             '<div class="listing-header">' +
               '<div>' +
-                '<span class="label" style="margin-bottom: 12px; display: inline-block;">' + escapeHtml(property.property_type || '') + '</span>' +
+                '<span class="label" style="margin-bottom: 12px; display: inline-block;">' + escapeHtml(formatPropertyType(property.property_type)) + '</span>' +
                 '<h1>' + escapeHtml(shortAddress) + '</h1>' +
                 '<div class="listing-header__subtitle">' + escapeHtml(property.borough || '') + ', New York</div>' +
               '</div>' +
@@ -587,48 +665,34 @@
                 '<div class="listing-header__price">' + escapeHtml(property.price_range) + ' <span>/month</span></div>' +
               '</div>' +
             '</div>' +
-          '</div>' +
 
-          /* Info grid: description + sidebar */
-          '<section style="padding-top: 0;">' +
-            '<div class="container">' +
-              '<div class="listing-info">' +
-                '<div class="listing-description reveal">' +
-                  '<h3>About This Property</h3>' +
-                  descriptionHtml +
-                  amenitiesHtml +
-                  featuresHtml +
-                '</div>' +
-                '<div class="listing-sidebar reveal reveal-delay-1">' +
-                  '<div class="sidebar-card">' +
-                    '<h4>Property Details</h4>' +
-                    sidebarHtml +
-                  '</div>' +
-                  '<div class="sidebar-card">' +
-                    '<h4>Interested?</h4>' +
-                    '<a href="contact.html" class="btn btn--primary" style="width: 100%; justify-content: center; margin-bottom: 12px;">' +
-                      'Schedule a Viewing <span class="btn__arrow">&rarr;</span>' +
-                    '</a>' +
-                    '<a href="tel:+17185550100" class="btn btn--outline" style="width: 100%; justify-content: center;">' +
-                      'Call (718) 555-0100' +
-                    '</a>' +
-                  '</div>' +
+            /* Quick stats pills */
+            statsHtml +
+
+            /* Two-column grid: description left, units right */
+            '<div class="listing-info">' +
+              '<div class="listing-description reveal">' +
+                '<h3>About This Property</h3>' +
+                descriptionHtml +
+                amenitiesHtml +
+                featuresHtml +
+                '<div class="listing-cta">' +
+                  '<a href="contact.html" class="btn btn--primary">' +
+                    'Schedule a Viewing <span class="btn__arrow">&rarr;</span>' +
+                  '</a>' +
+                  '<a href="tel:+17185550100" class="btn btn--outline">' +
+                    'Call (718) 555-0100' +
+                  '</a>' +
                 '</div>' +
               '</div>' +
-            '</div>' +
-          '</section>' +
-
-          /* Units section */
-          '<section class="units-section">' +
-            '<div class="container">' +
-              '<div class="section-header reveal">' +
-                '<span class="label">Units</span>' +
-                '<h2>Available Units <span style="font-size: 0.5em; font-weight: 300; color: var(--color-gray-400);">(' + availableUnits.length + ' of ' + totalUnits + ')</span></h2>' +
+              '<div class="units-section reveal reveal-delay-1">' +
+                '<h3>Available Units <span style="font-size: 0.5em; font-weight: 300; color: var(--color-gray-400);">(' + availableUnits.length + ' of ' + totalUnits + ')</span></h3>' +
+                '<div class="units-grid">' + unitsHtml + '</div>' +
               '</div>' +
-              '<div class="units-grid">' + unitsHtml + '</div>' +
             '</div>' +
-          '</section>';
+          '</div>';
 
+        bindGalleryHandlers();
         triggerRevealAnimations();
       }
 
