@@ -25,18 +25,22 @@
     .property-breadcrumb a:hover { color: var(--color-orange); }
     .property-breadcrumb span { margin: 0 8px; opacity: 0.4; }
 
-    /* Building hero image - compact */
+    /* Building hero image -- shows the full photo without cropping */
     .listing-hero {
       width: 100%;
-      aspect-ratio: 21 / 9;
-      max-height: 300px;
+      max-height: 420px;
       overflow: hidden;
       background: var(--color-charcoal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .listing-hero img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
+      max-height: 420px;
+      object-fit: contain;
+      background: var(--color-black);
     }
 
     /* Thumbnail gallery strip below hero */
@@ -173,93 +177,110 @@
       flex-wrap: wrap;
     }
 
-    /* Units section - inline in right column, no border */
-    .units-section {
-      padding-bottom: 0;
-    }
-    .units-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-      margin-top: 24px;
-    }
+    /* Units section */
+    .units-section { padding-bottom: 0; }
 
-    /* Unit card */
-    .unit-card {
-      background: rgba(26, 26, 26, 0.8);
-      border: 1px solid rgba(255,255,255,0.06);
-      padding: 32px;
-      transition: border-color 0.3s var(--ease-out);
-      backdrop-filter: blur(8px);
+    /* Units table -- compact, scannable, scales to any count */
+    .units-table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
     }
-    .unit-card:hover { border-color: rgba(232, 117, 17, 0.3); }
-    .unit-card--rented {
-      opacity: 0.7;
-      pointer-events: none;
-    }
-    .unit-card__header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .unit-card__name {
-      font-family: var(--font-display);
-      font-size: 1.5rem;
-      font-weight: 500;
-      color: var(--color-white);
-    }
-    .unit-card__badge {
+    .units-table thead th {
       font-size: 0.68rem;
       font-weight: 600;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      padding: 5px 12px;
+      color: var(--color-gray-400);
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      white-space: nowrap;
+    }
+    .units-table tbody tr {
+      cursor: pointer;
+      transition: background 0.2s ease;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .units-table tbody tr:hover {
+      background: rgba(232, 117, 17, 0.04);
+    }
+    .units-table tbody tr.unit-row--rented {
+      opacity: 0.5;
+    }
+    .units-table td {
+      padding: 14px 16px;
+      font-size: 0.9rem;
+      color: var(--color-gray-200);
+      vertical-align: middle;
+    }
+    .units-table .unit-name {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--color-white);
+    }
+    .units-table .unit-price {
+      font-weight: 500;
+      color: var(--color-orange);
+    }
+    .unit-badge {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      display: inline-block;
+    }
+    .unit-badge--available {
       background: var(--color-orange);
       color: var(--color-black);
     }
-    .unit-card__badge--rented {
+    .unit-badge--rented {
       background: var(--color-gray-700);
       color: var(--color-gray-300);
     }
-    .unit-card__price {
-      font-family: var(--font-display);
-      font-size: 1.8rem;
-      font-weight: 500;
-      color: var(--color-white);
-      margin-bottom: 12px;
-    }
-    .unit-card__price span {
-      font-size: 0.85rem;
-      font-weight: 300;
+    .unit-expand-icon {
+      font-size: 0.7rem;
       color: var(--color-gray-400);
+      transition: transform 0.3s var(--ease-out);
     }
-    .unit-card__specs {
-      display: flex;
-      gap: 20px;
-      padding: 16px 0;
-      border-top: 1px solid rgba(255,255,255,0.06);
+    .unit-row--expanded .unit-expand-icon {
+      transform: rotate(180deg);
+    }
+
+    /* Expanded detail row */
+    .unit-detail-row td {
+      padding: 0;
       border-bottom: 1px solid rgba(255,255,255,0.06);
-      margin-bottom: 16px;
     }
-    .unit-card__spec {
-      font-size: 0.85rem;
-      color: var(--color-gray-400);
+    .unit-detail {
+      padding: 20px 16px 24px;
+      background: rgba(26, 26, 26, 0.6);
+      display: none;
     }
-    .unit-card__desc {
-      font-size: 0.9rem;
+    .unit-row--expanded + .unit-detail-row .unit-detail {
+      display: block;
+      animation: fadeInDown 0.3s var(--ease-out);
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .unit-detail__desc {
+      font-size: 0.88rem;
       color: var(--color-gray-300);
-      line-height: 1.6;
+      line-height: 1.7;
       margin-bottom: 12px;
     }
-    .unit-card__amenities {
+    .unit-detail__amenities {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       margin-bottom: 12px;
     }
-    .unit-card__amenity {
-      font-size: 0.68rem;
+    .unit-detail__amenity {
+      font-size: 0.65rem;
       font-weight: 500;
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -267,13 +288,60 @@
       border: 1px solid rgba(255,255,255,0.08);
       color: var(--color-gray-400);
     }
-    .unit-card__date {
+    .unit-detail__date {
       font-size: 0.8rem;
       color: var(--color-gray-400);
     }
-    .unit-card__date strong {
+    .unit-detail__date strong {
       color: var(--color-gray-300);
       font-weight: 500;
+    }
+
+    /* Mobile: units as condensed cards instead of table */
+    .units-mobile { display: none; margin-top: 20px; }
+    .unit-mobile-card {
+      background: rgba(26, 26, 26, 0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 16px 20px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+    }
+    .unit-mobile-card:hover { border-color: rgba(232, 117, 17, 0.3); }
+    .unit-mobile-card--rented { opacity: 0.5; }
+    .unit-mobile-card__top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .unit-mobile-card__name {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: var(--color-white);
+    }
+    .unit-mobile-card__price {
+      font-weight: 500;
+      color: var(--color-orange);
+      font-size: 0.95rem;
+    }
+    .unit-mobile-card__specs {
+      font-size: 0.82rem;
+      color: var(--color-gray-400);
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .unit-mobile-card__detail {
+      display: none;
+      padding-top: 12px;
+      margin-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .unit-mobile-card--expanded .unit-mobile-card__detail {
+      display: block;
+      animation: fadeInDown 0.3s var(--ease-out);
     }
 
     /* Not found state */
@@ -289,9 +357,11 @@
       .listing-info { grid-template-columns: 1fr; gap: 40px; }
       .listing-header { flex-direction: column; }
       .features-grid { grid-template-columns: 1fr; }
-      .units-grid { grid-template-columns: 1fr; }
       .listing-cta { flex-direction: column; }
       .listing-cta .btn { width: 100%; justify-content: center; }
+      .units-table { display: none; }
+      .units-mobile { display: block; }
+      .listing-hero img { max-height: 280px; }
     }
   </style>
 </head>
@@ -515,46 +585,79 @@
         return months[parseInt(parts[1], 10) - 1] + ' ' + parseInt(parts[2], 10) + ', ' + parts[0];
       }
 
-      /** Renders a single unit card. */
-      function renderUnitCard(unit) {
+      /** Builds the expandable detail content for a unit row. */
+      function buildUnitDetail(unit) {
         var isRented = unit.status === 'Occupied' || unit.status === 'occupied';
-        var rentedClass = isRented ? ' unit-card--rented' : '';
-        var badgeClass = isRented ? 'unit-card__badge unit-card__badge--rented' : 'unit-card__badge';
-        var badgeText = isRented ? 'Rented' : 'Available';
-        var bedLabel = unit.bedrooms === 0 ? 'Studio' : unit.bedrooms + ' Bed';
-        var price = '$' + (unit.rent_amount || 0).toLocaleString();
+        var parts = [];
 
-        var amenitiesHtml = '';
-        if (unit.amenities && unit.amenities.length > 0) {
-          amenitiesHtml = '<div class="unit-card__amenities">';
-          for (var i = 0; i < unit.amenities.length; i++) {
-            amenitiesHtml += '<span class="unit-card__amenity">' + escapeHtml(unit.amenities[i].amenity_name) + '</span>';
-          }
-          amenitiesHtml += '</div>';
+        if (unit.description) {
+          parts.push('<div class="unit-detail__desc">' + escapeHtml(unit.description) + '</div>');
         }
 
-        var descHtml = unit.description
-          ? '<div class="unit-card__desc">' + escapeHtml(unit.description) + '</div>'
-          : '';
+        if (unit.amenities && unit.amenities.length > 0) {
+          var amenities = '<div class="unit-detail__amenities">';
+          for (var i = 0; i < unit.amenities.length; i++) {
+            amenities += '<span class="unit-detail__amenity">' + escapeHtml(unit.amenities[i].amenity_name) + '</span>';
+          }
+          amenities += '</div>';
+          parts.push(amenities);
+        }
 
-        var dateHtml = !isRented && unit.date_available
-          ? '<div class="unit-card__date">Available <strong>' + formatDate(unit.date_available) + '</strong></div>'
-          : '';
+        if (!isRented && unit.date_available) {
+          parts.push('<div class="unit-detail__date">Available <strong>' + formatDate(unit.date_available) + '</strong></div>');
+        }
 
-        return '<div class="unit-card' + rentedClass + '">' +
-          '<div class="unit-card__header">' +
-            '<div class="unit-card__name">Unit ' + escapeHtml(unit.unit_name) + '</div>' +
+        return parts.length > 0 ? parts.join('') : '<div class="unit-detail__desc" style="color:var(--color-gray-700)">No additional details.</div>';
+      }
+
+      /** Renders the desktop table rows for a unit (main row + hidden detail row). */
+      function renderUnitTableRow(unit) {
+        var isRented = unit.status === 'Occupied' || unit.status === 'occupied';
+        var rowClass = isRented ? ' unit-row--rented' : '';
+        var bedLabel = unit.bedrooms === 0 ? 'Studio' : unit.bedrooms + ' Bed';
+        var price = '$' + (unit.rent_amount || 0).toLocaleString();
+        var badgeClass = isRented ? 'unit-badge unit-badge--rented' : 'unit-badge unit-badge--available';
+        var badgeText = isRented ? 'Rented' : 'Available';
+        var sqft = unit.square_feet ? unit.square_feet.toLocaleString() : '-';
+
+        return '<tr class="unit-row' + rowClass + '">' +
+            '<td><span class="unit-name">Unit ' + escapeHtml(unit.unit_name) + '</span></td>' +
+            '<td>' + bedLabel + '</td>' +
+            '<td>' + (unit.bathrooms || '-') + ' Bath</td>' +
+            '<td>' + sqft + '</td>' +
+            '<td><span class="unit-price">' + price + '</span></td>' +
+            '<td>' + (!isRented && unit.date_available ? formatDate(unit.date_available) : '-') + '</td>' +
+            '<td><span class="' + badgeClass + '">' + badgeText + '</span></td>' +
+            '<td><span class="unit-expand-icon">&#9660;</span></td>' +
+          '</tr>' +
+          '<tr class="unit-detail-row"><td colspan="8"><div class="unit-detail">' +
+            buildUnitDetail(unit) +
+          '</div></td></tr>';
+      }
+
+      /** Renders a mobile unit card with expandable detail. */
+      function renderUnitMobileCard(unit) {
+        var isRented = unit.status === 'Occupied' || unit.status === 'occupied';
+        var rentedClass = isRented ? ' unit-mobile-card--rented' : '';
+        var bedLabel = unit.bedrooms === 0 ? 'Studio' : unit.bedrooms + ' Bed';
+        var price = '$' + (unit.rent_amount || 0).toLocaleString();
+        var badgeClass = isRented ? 'unit-badge unit-badge--rented' : 'unit-badge unit-badge--available';
+        var badgeText = isRented ? 'Rented' : 'Available';
+
+        return '<div class="unit-mobile-card' + rentedClass + '">' +
+          '<div class="unit-mobile-card__top">' +
+            '<span class="unit-mobile-card__name">Unit ' + escapeHtml(unit.unit_name) + '</span>' +
+            '<span class="unit-mobile-card__price">' + price + '/mo</span>' +
+          '</div>' +
+          '<div class="unit-mobile-card__specs">' +
+            '<span>' + bedLabel + '</span>' +
+            '<span>' + (unit.bathrooms || '-') + ' Bath</span>' +
+            (unit.square_feet ? '<span>' + unit.square_feet.toLocaleString() + ' sqft</span>' : '') +
             '<span class="' + badgeClass + '">' + badgeText + '</span>' +
           '</div>' +
-          '<div class="unit-card__price">' + price + ' <span>/month</span></div>' +
-          '<div class="unit-card__specs">' +
-            '<span class="unit-card__spec">' + bedLabel + '</span>' +
-            '<span class="unit-card__spec">' + unit.bathrooms + ' Bath</span>' +
-            (unit.square_feet ? '<span class="unit-card__spec">' + unit.square_feet.toLocaleString() + ' sqft</span>' : '') +
+          '<div class="unit-mobile-card__detail">' +
+            buildUnitDetail(unit) +
           '</div>' +
-          descHtml +
-          amenitiesHtml +
-          dateHtml +
         '</div>';
       }
 
@@ -640,10 +743,16 @@
           ? '<p>' + escapeHtml(property.description) + '</p>'
           : '<p>Contact us for more information about this property.</p>';
 
-        /* Unit cards */
-        var unitsHtml = '';
+        /* Desktop table rows */
+        var tableRowsHtml = '';
         for (var k = 0; k < property.units.length; k++) {
-          unitsHtml += renderUnitCard(property.units[k]);
+          tableRowsHtml += renderUnitTableRow(property.units[k]);
+        }
+
+        /* Mobile cards */
+        var mobileCardsHtml = '';
+        for (var mc = 0; mc < property.units.length; mc++) {
+          mobileCardsHtml += renderUnitMobileCard(property.units[mc]);
         }
 
         contentEl.innerHTML =
@@ -687,13 +796,36 @@
               '</div>' +
               '<div class="units-section reveal reveal-delay-1">' +
                 '<h3>Available Units <span style="font-size: 0.5em; font-weight: 300; color: var(--color-gray-400);">(' + availableUnits.length + ' of ' + totalUnits + ')</span></h3>' +
-                '<div class="units-grid">' + unitsHtml + '</div>' +
+                '<table class="units-table"><thead><tr>' +
+                  '<th>Unit</th><th>Beds</th><th>Bath</th><th>Sqft</th><th>Rent</th><th>Available</th><th>Status</th><th></th>' +
+                '</tr></thead><tbody>' + tableRowsHtml + '</tbody></table>' +
+                '<div class="units-mobile">' + mobileCardsHtml + '</div>' +
               '</div>' +
             '</div>' +
           '</div>';
 
         bindGalleryHandlers();
+        bindUnitExpansion();
         triggerRevealAnimations();
+      }
+
+      /** Binds click handlers on table rows and mobile cards to toggle detail expansion. */
+      function bindUnitExpansion() {
+        /* Desktop table rows */
+        var rows = contentEl.querySelectorAll('.unit-row');
+        for (var i = 0; i < rows.length; i++) {
+          rows[i].addEventListener('click', function () {
+            this.classList.toggle('unit-row--expanded');
+          });
+        }
+
+        /* Mobile cards */
+        var cards = contentEl.querySelectorAll('.unit-mobile-card');
+        for (var j = 0; j < cards.length; j++) {
+          cards[j].addEventListener('click', function () {
+            this.classList.toggle('unit-mobile-card--expanded');
+          });
+        }
       }
 
       /** Triggers IntersectionObserver on dynamically inserted .reveal elements. */
