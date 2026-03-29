@@ -12,6 +12,29 @@
   if (!grid) return;
 
   /**
+   * Shows skeleton placeholder cards while data is loading.
+   * Renders 6 cards matching the property-card layout.
+   */
+  function showSkeletons() {
+    var html = '';
+    for (var i = 0; i < 6; i++) {
+      var delay = i % 3 === 1 ? ' reveal-delay-1' : i % 3 === 2 ? ' reveal-delay-2' : '';
+      html += '<div class="property-card skeleton-card reveal visible' + delay + '">' +
+        '<div class="property-card__image skeleton-block" style="height:200px;border-radius:0"></div>' +
+        '<div class="property-card__body" style="padding:20px">' +
+          '<div class="skeleton-line" style="width:40%;height:22px;margin-bottom:10px"></div>' +
+          '<div class="skeleton-line" style="width:65%;height:14px;margin-bottom:14px"></div>' +
+          '<div class="skeleton-line" style="width:50%;height:12px"></div>' +
+        '</div>' +
+      '</div>';
+    }
+    grid.innerHTML = html;
+    if (countEl) countEl.textContent = '';
+  }
+
+  showSkeletons();
+
+  /**
    * Returns a placeholder image URL for a given index.
    * Cycles through the array if index exceeds length.
    */
@@ -139,6 +162,9 @@
     }
     grid.innerHTML = html;
     if (countEl) countEl.textContent = properties.length;
+    /* Fade in the count text now that data is loaded */
+    var countWrap = document.getElementById('listings-count-wrap');
+    if (countWrap) countWrap.style.opacity = '1';
     setupFilters();
     triggerRevealAnimations();
   }
