@@ -154,6 +154,52 @@ var FALLBACK_DATA = [
     available_count: 1
   },
   {
+    id: "prop-7",
+    address: "1250 Grand Concourse, Bronx",
+    borough: "Bronx",
+    property_type: "Apartment 5+",
+    description: "Large elevator building on the Grand Concourse with a mix of studios through three-bedrooms. On-site laundry, live-in super, and steps from the B/D train. Recently upgraded common areas and lobby.",
+    elevator: true,
+    parking: true,
+    laundry_in_building: true,
+    super_on_site: true,
+    pet_policy: "Cats and Dogs",
+    heating_type: "Steam",
+    cooling_type: "Window Units",
+    photos: [
+      {file_path: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80", file_name: "building.jpg"},
+      {file_path: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80", file_name: "living-room.jpg"},
+      {file_path: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80", file_name: "kitchen.jpg"},
+      {file_path: "https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=1200&q=80", file_name: "bedroom.jpg"}
+    ],
+    amenities: [
+      {amenity_name: "Doorman", category: "Building"},
+      {amenity_name: "Gym", category: "Building"},
+      {amenity_name: "Roof Deck", category: "Building"},
+      {amenity_name: "Package Room", category: "Building"},
+      {amenity_name: "Bike Room", category: "Building"},
+      {amenity_name: "Storage", category: "Building"},
+      {amenity_name: "Laundry In-Building", category: "Laundry"},
+      {amenity_name: "Water Included", category: "Utilities"},
+      {amenity_name: "Heat Included", category: "Utilities"}
+    ],
+    units: [
+      {id:"u11",unit_name:"1A",bedrooms:0,bathrooms:1,square_feet:420,rent_amount:1850,status:"Vacant",pet_friendly:true,photos:[],amenities:[{amenity_name:"Tile",category:"Interior"}],description:"Compact studio with updated kitchen. Great starter apartment.",date_available:"2026-04-01"},
+      {id:"u12",unit_name:"2A",bedrooms:1,bathrooms:1,square_feet:620,rent_amount:2200,status:"Vacant",pet_friendly:true,photos:[],amenities:[{amenity_name:"Hardwood Floors",category:"Interior"},{amenity_name:"Natural Light",category:"Interior"}],description:"Bright one-bedroom facing the courtyard. Hardwood floors throughout.",date_available:"2026-04-15"},
+      {id:"u13",unit_name:"2B",bedrooms:1,bathrooms:1,square_feet:650,rent_amount:2350,status:"Occupied",photos:[],amenities:[{amenity_name:"Hardwood Floors",category:"Interior"}],description:"One-bedroom with open layout."},
+      {id:"u14",unit_name:"3A",bedrooms:2,bathrooms:1,square_feet:875,rent_amount:2900,status:"Vacant",pet_friendly:true,renovated:true,photos:[],amenities:[{amenity_name:"Dishwasher",category:"Kitchen"},{amenity_name:"Granite Countertops",category:"Kitchen"},{amenity_name:"Updated Bathroom",category:"Bathroom"}],description:"Fully renovated two-bedroom with brand new kitchen and bath. Dishwasher and granite counters.",date_available:"2026-04-01"},
+      {id:"u15",unit_name:"3B",bedrooms:2,bathrooms:1,square_feet:850,rent_amount:2800,status:"Vacant",photos:[],amenities:[{amenity_name:"Hardwood Floors",category:"Interior"}],description:"Two-bedroom with good closet space and a separate kitchen.",date_available:"2026-05-01"},
+      {id:"u16",unit_name:"4A",bedrooms:2,bathrooms:1,square_feet:900,rent_amount:3050,status:"Vacant",pet_friendly:true,laundry_in_unit:true,photos:[],amenities:[{amenity_name:"Washer/Dryer In-Unit",category:"Laundry"},{amenity_name:"Dishwasher",category:"Kitchen"},{amenity_name:"High Ceilings",category:"Interior"}],description:"Corner two-bedroom with in-unit washer/dryer. High ceilings and lots of light.",date_available:"2026-04-15"},
+      {id:"u17",unit_name:"4B",bedrooms:1,bathrooms:1,square_feet:600,rent_amount:2100,status:"Occupied",photos:[],amenities:[],description:"Cozy one-bedroom on the fourth floor."},
+      {id:"u18",unit_name:"5A",bedrooms:3,bathrooms:2,square_feet:1150,rent_amount:4100,status:"Vacant",pet_friendly:true,laundry_in_unit:true,renovated:true,photos:[],amenities:[{amenity_name:"Washer/Dryer In-Unit",category:"Laundry"},{amenity_name:"Central AC",category:"Climate"},{amenity_name:"Walk-in Closet",category:"Interior"},{amenity_name:"Dishwasher",category:"Kitchen"},{amenity_name:"Balcony",category:"Outdoor"}],description:"Premium three-bedroom with two full baths, in-unit laundry, central AC, and a balcony. Top floor views.",date_available:"2026-04-01"},
+      {id:"u19",unit_name:"5B",bedrooms:3,bathrooms:1,square_feet:1050,rent_amount:3800,status:"Vacant",photos:[],amenities:[{amenity_name:"Hardwood Floors",category:"Interior"},{amenity_name:"High Ceilings",category:"Interior"}],description:"Spacious three-bedroom with classic pre-war details. High ceilings and original hardwood.",date_available:"2026-05-15"},
+      {id:"u20",unit_name:"6A",bedrooms:2,bathrooms:1,square_feet:920,rent_amount:3200,status:"Vacant",pet_friendly:true,renovated:true,photos:[],amenities:[{amenity_name:"Stainless Steel Appliances",category:"Kitchen"},{amenity_name:"Updated Bathroom",category:"Bathroom"},{amenity_name:"Ceiling Fans",category:"Climate"}],description:"Top floor renovated two-bedroom with city views. Stainless appliances and updated bath.",date_available:"2026-04-01"}
+    ],
+    price_range: "$1,850 - $4,100",
+    bed_range: "Studio - 3 Bed",
+    available_count: 8
+  },
+  {
     id: "prop-rented-1",
     address: "1920 Jerome Ave, Bronx",
     borough: "Bronx",
