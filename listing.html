@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#E87511">
+  <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+  <link rel="icon" type="image/png" href="img/logo.png">
+  <title>Property Details | Global Realty Development</title>
+  <meta name="description" content="View property details and available units at Global Realty Development.">
+  <meta property="og:title" content="Property Details | Global Realty Development">
+  <meta property="og:description" content="View property details and available units at Global Realty Development.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="img/logo.png">
+  <meta property="og:site_name" content="Global Realty Development">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* Breadcrumb - matches property.html */
+    .property-breadcrumb {
+      padding: calc(var(--nav-height) + 24px) 0 16px;
+      font-size: 0.8rem;
+      color: var(--color-gray-400);
+    }
+    .property-breadcrumb a { transition: color 0.3s; }
+    .property-breadcrumb a:hover { color: var(--color-orange); }
+    .property-breadcrumb span { margin: 0 8px; opacity: 0.4; }
+
+    /* Building hero image */
+    .listing-hero {
+      width: 100%;
+      aspect-ratio: 21 / 9;
+      max-height: 480px;
+      overflow: hidden;
+      background: var(--color-charcoal);
+    }
+    .listing-hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Building header */
+    .listing-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 24px;
+      padding: 40px 0 32px;
+    }
+    .listing-header h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 8px;
+    }
+    .listing-header__subtitle {
+      font-size: 0.95rem;
+      color: var(--color-gray-400);
+    }
+    .listing-header__price {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 500;
+      color: var(--color-orange);
+      line-height: 1;
+    }
+    .listing-header__price span {
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: var(--color-gray-400);
+    }
+
+    /* Building info grid */
+    .listing-info {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 60px;
+      padding-bottom: 60px;
+    }
+
+    /* Description section */
+    .listing-description p {
+      color: var(--color-gray-300);
+      font-size: 1rem;
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+
+    /* Feature pills for building amenities */
+    .listing-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .listing-pill {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--color-gray-300);
+      background: rgba(255,255,255,0.03);
+    }
+
+    /* Building features list - reuses property.html pattern */
+    .listing-features { margin-top: 32px; }
+    .listing-features h4 { margin-bottom: 16px; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .features-grid__item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--color-gray-300);
+      padding: 8px 0;
+    }
+    .features-grid__item::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--color-orange);
+      flex-shrink: 0;
+    }
+
+    /* Quick info sidebar card */
+    .listing-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .sidebar-card {
+      background: var(--color-charcoal);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 36px;
+    }
+    .sidebar-card h4 { margin-bottom: 24px; }
+
+    /* Units section */
+    .units-section {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 60px;
+      padding-bottom: 80px;
+    }
+    .units-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    /* Unit card */
+    .unit-card {
+      background: rgba(26, 26, 26, 0.8);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 32px;
+      transition: border-color 0.3s var(--ease-out);
+      backdrop-filter: blur(8px);
+    }
+    .unit-card:hover { border-color: rgba(232, 117, 17, 0.3); }
+    .unit-card--rented {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .unit-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .unit-card__name {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--color-white);
+    }
+    .unit-card__badge {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      background: var(--color-orange);
+      color: var(--color-black);
+    }
+    .unit-card__badge--rented {
+      background: var(--color-gray-700);
+      color: var(--color-gray-300);
+    }
+    .unit-card__price {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 500;
+      color: var(--color-white);
+      margin-bottom: 12px;
+    }
+    .unit-card__price span {
+      font-size: 0.85rem;
+      font-weight: 300;
+      color: var(--color-gray-400);
+    }
+    .unit-card__specs {
+      display: flex;
+      gap: 20px;
+      padding: 16px 0;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 16px;
+    }
+    .unit-card__spec {
+      font-size: 0.85rem;
+      color: var(--color-gray-400);
+    }
+    .unit-card__desc {
+      font-size: 0.9rem;
+      color: var(--color-gray-300);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .unit-card__amenities {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .unit-card__amenity {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--color-gray-400);
+    }
+    .unit-card__date {
+      font-size: 0.8rem;
+      color: var(--color-gray-400);
+    }
+    .unit-card__date strong {
+      color: var(--color-gray-300);
+      font-weight: 500;
+    }
+
+    /* Not found state */
+    .listing-not-found {
+      text-align: center;
+      padding: 120px 0;
+    }
+    .listing-not-found h2 {
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .listing-info { grid-template-columns: 1fr; gap: 40px; }
+      .listing-header { flex-direction: column; }
+      .features-grid { grid-template-columns: 1fr; }
+      .units-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav scrolled">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo">
+        <span class="nav__logo-wordmark">Global <span>Realty Development</span></span>
+      </a>
+      <div class="nav__links">
+        <a href="index.html">Home</a>
+        <a href="listings.html" class="active">Properties</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <div class="nav__dropdown">
+          <a class="nav__dropdown-toggle" role="button" tabindex="0">Apply <span class="nav__dropdown-arrow">&#9660;</span></a>
+          <div class="nav__dropdown-menu">
+            <a href="apply.html">Tenant Application</a>
+            <a class="coming-soon">Landlord Application <span>Coming Soon</span></a>
+          </div>
+        </div>
+      </div>
+      <div class="nav__toggle" role="button" tabindex="0" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Breadcrumb -->
+  <div class="property-breadcrumb">
+    <div class="container">
+      <a href="index.html">Home</a>
+      <span>/</span>
+      <a href="listings.html">Properties</a>
+      <span>/</span>
+      <span id="breadcrumb-address">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Dynamic content inserted here -->
+  <div id="listing-content"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a href="index.html" class="nav__logo">
+            <span class="nav__logo-wordmark">Global <span>Realty Development</span></span>
+          </a>
+          <p>Premium property management and real estate development across New York City. Professional service, exceptional living.</p>
+        </div>
+        <div>
+          <div class="footer__heading">Navigation</div>
+          <div class="footer__links">
+            <a href="index.html">Home</a>
+            <a href="listings.html">Properties</a>
+            <a href="about.html">About Us</a>
+            <a href="contact.html">Contact</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer__heading">Services</div>
+          <div class="footer__links">
+            <a href="contact.html">Property Management</a>
+            <a href="contact.html">Tenant Placement</a>
+            <a href="contact.html">Lease Administration</a>
+            <a href="contact.html">Maintenance</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer__heading">Contact</div>
+          <div class="footer__links">
+            <a href="contact.html">Bronx, New York</a>
+            <a href="mailto:admin@globalrealtydevelopment.com">admin@globalrealtydevelopment.com</a>
+            <a href="tel:+17185550100">(718) 555-0100</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>&copy; 2026 Global Realty Development. All rights reserved.</span>
+        <span>Licensed Real Estate Broker</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/listings-data.js"></script>
+  <script>
+    /* ============================================
+       LISTING DETAIL - Renders a single property
+       with building info and unit cards.
+       ============================================ */
+    (function () {
+      'use strict';
+
+      var contentEl = document.getElementById('listing-content');
+      var breadcrumbEl = document.getElementById('breadcrumb-address');
+      var params = new URLSearchParams(window.location.search);
+      var propertyId = params.get('id');
+
+      if (!propertyId) {
+        showNotFound();
+        return;
+      }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      /** Returns the hero image URL for the building. */
+      function getHeroImage(property) {
+        if (property.photos && property.photos.length > 0) {
+          var url = property.photos[0].url || property.photos[0];
+          /* Use high-res version for hero */
+          return url.replace('w=600', 'w=1200');
+        }
+        for (var i = 0; i < property.units.length; i++) {
+          if (property.units[i].photos && property.units[i].photos.length > 0) {
+            var unitUrl = property.units[i].photos[0].url || property.units[i].photos[0];
+            return unitUrl.replace('w=600', 'w=1200');
+          }
+        }
+        /* Fallback: use the property index in FALLBACK_DATA to pick a placeholder */
+        var idx = 0;
+        for (var j = 0; j < FALLBACK_DATA.length; j++) {
+          if (FALLBACK_DATA[j].id === property.id) { idx = j; break; }
+        }
+        return LISTINGS_CONFIG.PLACEHOLDER_IMAGES[idx % LISTINGS_CONFIG.PLACEHOLDER_IMAGES.length]
+          .replace('w=600', 'w=1200');
+      }
+
+      /** Builds the building features list from boolean flags. */
+      function buildBuildingFeatures(property) {
+        var features = [];
+        if (property.elevator) features.push('Elevator');
+        if (property.parking) features.push('Parking');
+        if (property.laundry_in_building) features.push('Laundry in Building');
+        if (property.super_on_site) features.push('Super on Site');
+        if (property.pet_policy) features.push('Pets: ' + escapeHtml(property.pet_policy));
+        return features;
+      }
+
+      /** Formats a date string (YYYY-MM-DD) to a readable format. */
+      function formatDate(dateStr) {
+        if (!dateStr) return 'Contact for details';
+        var parts = dateStr.split('-');
+        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return months[parseInt(parts[1], 10) - 1] + ' ' + parseInt(parts[2], 10) + ', ' + parts[0];
+      }
+
+      /** Renders a single unit card. */
+      function renderUnitCard(unit) {
+        var isRented = unit.status === 'Occupied' || unit.status === 'occupied';
+        var rentedClass = isRented ? ' unit-card--rented' : '';
+        var badgeClass = isRented ? 'unit-card__badge unit-card__badge--rented' : 'unit-card__badge';
+        var badgeText = isRented ? 'Rented' : 'Available';
+        var bedLabel = unit.bedrooms === 0 ? 'Studio' : unit.bedrooms + ' Bed';
+        var price = '$' + (unit.rent_amount || 0).toLocaleString();
+
+        var amenitiesHtml = '';
+        if (unit.amenities && unit.amenities.length > 0) {
+          amenitiesHtml = '<div class="unit-card__amenities">';
+          for (var i = 0; i < unit.amenities.length; i++) {
+            amenitiesHtml += '<span class="unit-card__amenity">' + escapeHtml(unit.amenities[i].amenity_name) + '</span>';
+          }
+          amenitiesHtml += '</div>';
+        }
+
+        var descHtml = unit.description
+          ? '<div class="unit-card__desc">' + escapeHtml(unit.description) + '</div>'
+          : '';
+
+        var dateHtml = !isRented && unit.date_available
+          ? '<div class="unit-card__date">Available <strong>' + formatDate(unit.date_available) + '</strong></div>'
+          : '';
+
+        return '<div class="unit-card' + rentedClass + '">' +
+          '<div class="unit-card__header">' +
+            '<div class="unit-card__name">Unit ' + escapeHtml(unit.unit_name) + '</div>' +
+            '<span class="' + badgeClass + '">' + badgeText + '</span>' +
+          '</div>' +
+          '<div class="unit-card__price">' + price + ' <span>/month</span></div>' +
+          '<div class="unit-card__specs">' +
+            '<span class="unit-card__spec">' + bedLabel + '</span>' +
+            '<span class="unit-card__spec">' + unit.bathrooms + ' Bath</span>' +
+            (unit.square_feet ? '<span class="unit-card__spec">' + unit.square_feet.toLocaleString() + ' sqft</span>' : '') +
+          '</div>' +
+          descHtml +
+          amenitiesHtml +
+          dateHtml +
+        '</div>';
+      }
+
+      /** Renders the full property detail page. */
+      function renderProperty(property) {
+        var shortAddress = property.address.split(',')[0];
+        document.title = property.address + ' | Global Realty Development';
+        breadcrumbEl.textContent = shortAddress;
+
+        var heroImage = getHeroImage(property);
+        var features = buildBuildingFeatures(property);
+        var availableUnits = property.units.filter(function (u) {
+          return u.status !== 'Occupied' && u.status !== 'occupied';
+        });
+        var totalUnits = property.units.length;
+
+        /* Building amenities pills */
+        var amenitiesHtml = '';
+        if (property.amenities && property.amenities.length > 0) {
+          amenitiesHtml = '<div class="listing-pills">';
+          for (var i = 0; i < property.amenities.length; i++) {
+            amenitiesHtml += '<span class="listing-pill">' + escapeHtml(property.amenities[i].amenity_name) + '</span>';
+          }
+          amenitiesHtml += '</div>';
+        }
+
+        /* Building features list */
+        var featuresHtml = '';
+        if (features.length > 0) {
+          featuresHtml = '<div class="listing-features"><h4>Building Features</h4><div class="features-grid">';
+          for (var j = 0; j < features.length; j++) {
+            featuresHtml += '<div class="features-grid__item">' + features[j] + '</div>';
+          }
+          featuresHtml += '</div></div>';
+        }
+
+        /* Description or fallback */
+        var descriptionHtml = property.description
+          ? '<p>' + escapeHtml(property.description) + '</p>'
+          : '<p>Contact us for more information about this property.</p>';
+
+        /* Unit cards */
+        var unitsHtml = '';
+        for (var k = 0; k < property.units.length; k++) {
+          unitsHtml += renderUnitCard(property.units[k]);
+        }
+
+        /* Sidebar quick info items */
+        var sidebarItems = [
+          { label: 'Property Type', value: property.property_type || 'N/A' },
+          { label: 'Borough', value: property.borough || 'N/A' },
+          { label: 'Total Units', value: String(totalUnits) },
+          { label: 'Available', value: String(property.available_count || 0) },
+          { label: 'Price Range', value: property.price_range || 'N/A' },
+          { label: 'Bed Range', value: property.bed_range || 'N/A' }
+        ];
+        var sidebarHtml = '';
+        for (var m = 0; m < sidebarItems.length; m++) {
+          sidebarHtml += '<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);">' +
+            '<span style="font-size: 0.85rem; color: var(--color-gray-400);">' + sidebarItems[m].label + '</span>' +
+            '<span style="font-size: 0.85rem; color: var(--color-white); font-weight: 500;">' + escapeHtml(sidebarItems[m].value) + '</span>' +
+          '</div>';
+        }
+
+        contentEl.innerHTML =
+          /* Hero image */
+          '<div class="listing-hero">' +
+            '<img src="' + escapeHtml(heroImage) + '" alt="' + escapeHtml(property.address) + '">' +
+          '</div>' +
+
+          /* Header */
+          '<div class="container">' +
+            '<div class="listing-header">' +
+              '<div>' +
+                '<span class="label" style="margin-bottom: 12px; display: inline-block;">' + escapeHtml(property.property_type || '') + '</span>' +
+                '<h1>' + escapeHtml(shortAddress) + '</h1>' +
+                '<div class="listing-header__subtitle">' + escapeHtml(property.borough || '') + ', New York</div>' +
+              '</div>' +
+              '<div>' +
+                '<div class="listing-header__price">' + escapeHtml(property.price_range) + ' <span>/month</span></div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+
+          /* Info grid: description + sidebar */
+          '<section style="padding-top: 0;">' +
+            '<div class="container">' +
+              '<div class="listing-info">' +
+                '<div class="listing-description reveal">' +
+                  '<h3>About This Property</h3>' +
+                  descriptionHtml +
+                  amenitiesHtml +
+                  featuresHtml +
+                '</div>' +
+                '<div class="listing-sidebar reveal reveal-delay-1">' +
+                  '<div class="sidebar-card">' +
+                    '<h4>Property Details</h4>' +
+                    sidebarHtml +
+                  '</div>' +
+                  '<div class="sidebar-card">' +
+                    '<h4>Interested?</h4>' +
+                    '<a href="contact.html" class="btn btn--primary" style="width: 100%; justify-content: center; margin-bottom: 12px;">' +
+                      'Schedule a Viewing <span class="btn__arrow">&rarr;</span>' +
+                    '</a>' +
+                    '<a href="tel:+17185550100" class="btn btn--outline" style="width: 100%; justify-content: center;">' +
+                      'Call (718) 555-0100' +
+                    '</a>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</section>' +
+
+          /* Units section */
+          '<section class="units-section">' +
+            '<div class="container">' +
+              '<div class="section-header reveal">' +
+                '<span class="label">Units</span>' +
+                '<h2>Available Units <span style="font-size: 0.5em; font-weight: 300; color: var(--color-gray-400);">(' + availableUnits.length + ' of ' + totalUnits + ')</span></h2>' +
+              '</div>' +
+              '<div class="units-grid">' + unitsHtml + '</div>' +
+            '</div>' +
+          '</section>';
+
+        triggerRevealAnimations();
+      }
+
+      /** Triggers IntersectionObserver on dynamically inserted .reveal elements. */
+      function triggerRevealAnimations() {
+        var els = contentEl.querySelectorAll('.reveal');
+        if (!els.length) return;
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12 });
+        for (var i = 0; i < els.length; i++) {
+          observer.observe(els[i]);
+        }
+      }
+
+      /** Shows a not-found message when no property matches the ID. */
+      function showNotFound() {
+        breadcrumbEl.textContent = 'Not Found';
+        contentEl.innerHTML =
+          '<div class="container listing-not-found">' +
+            '<h2>Property Not Found</h2>' +
+            '<p class="text-muted">The property you are looking for does not exist or has been removed.</p>' +
+            '<a href="listings.html" class="btn btn--primary" style="margin-top: 24px;">' +
+              'Browse Properties <span class="btn__arrow">&rarr;</span>' +
+            '</a>' +
+          '</div>';
+      }
+
+      /** Finds a property in fallback data by ID. */
+      function findInFallback(id) {
+        for (var i = 0; i < FALLBACK_DATA.length; i++) {
+          if (FALLBACK_DATA[i].id === id) return FALLBACK_DATA[i];
+        }
+        return null;
+      }
+
+      /** Attempts API fetch for a single property, falls back to hardcoded data. */
+      function loadProperty() {
+        fetch(LISTINGS_CONFIG.API_URL + '/' + encodeURIComponent(propertyId), { signal: AbortSignal.timeout(3000) })
+          .then(function (res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
+          .then(function (data) {
+            if (!data || !data.id) throw new Error('Invalid response');
+            renderProperty(data);
+          })
+          .catch(function () {
+            var property = findInFallback(propertyId);
+            if (property) {
+              renderProperty(property);
+            } else {
+              showNotFound();
+            }
+          });
+      }
+
+      loadProperty();
+    })();
+  </script>
+</body>
+</html>
