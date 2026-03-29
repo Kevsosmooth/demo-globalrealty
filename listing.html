@@ -25,42 +25,120 @@
     .property-breadcrumb a:hover { color: var(--color-orange); }
     .property-breadcrumb span { margin: 0 8px; opacity: 0.4; }
 
-    /* Building hero image -- shows the full photo without cropping */
+    /* Hero image -- 16:9 aspect ratio, standard for real estate listings */
     .listing-hero {
       width: 100%;
-      max-height: 420px;
+      aspect-ratio: 16 / 9;
+      max-height: 480px;
       overflow: hidden;
-      background: var(--color-charcoal);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: var(--color-black);
+      cursor: pointer;
+      position: relative;
     }
     .listing-hero img {
       width: 100%;
-      height: auto;
-      max-height: 420px;
-      object-fit: contain;
-      background: var(--color-black);
+      height: 100%;
+      object-fit: cover;
+    }
+    .listing-hero__zoom {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-white);
+      background: rgba(0, 0, 0, 0.6);
+      padding: 6px 14px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
     }
 
-    /* Thumbnail gallery strip below hero */
+    /* Thumbnail gallery -- centered under hero */
     .listing-gallery {
       display: flex;
+      justify-content: center;
       gap: 4px;
-      padding: 4px 0;
+      padding: 8px 0;
       background: var(--color-charcoal);
     }
     .listing-gallery__thumb {
-      height: 60px;
-      width: 80px;
+      height: 56px;
+      width: 76px;
       object-fit: cover;
       cursor: pointer;
       opacity: 0.5;
       transition: opacity 0.3s;
+      border: 2px solid transparent;
     }
-    .listing-gallery__thumb:hover,
+    .listing-gallery__thumb:hover {
+      opacity: 0.85;
+    }
     .listing-gallery__thumb.active {
       opacity: 1;
+      border-color: var(--color-orange);
+    }
+
+    /* Photo lightbox overlay */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .lightbox.open {
+      display: flex;
+    }
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+    }
+    .lightbox__close {
+      position: absolute;
+      top: 24px;
+      right: 32px;
+      font-size: 2rem;
+      color: var(--color-white);
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      background: none;
+      border: none;
+      font-family: var(--font-body);
+    }
+    .lightbox__close:hover { opacity: 1; }
+    .lightbox__nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2.5rem;
+      color: var(--color-white);
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+      background: none;
+      border: none;
+      padding: 16px;
+      font-family: var(--font-body);
+    }
+    .lightbox__nav:hover { opacity: 1; }
+    .lightbox__prev { left: 16px; }
+    .lightbox__next { right: 16px; }
+    .lightbox__counter {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.85rem;
+      color: var(--color-gray-400);
+      letter-spacing: 0.1em;
     }
 
     /* Building header - tighter padding */
@@ -361,7 +439,8 @@
       .listing-cta .btn { width: 100%; justify-content: center; }
       .units-table { display: none; }
       .units-mobile { display: block; }
-      .listing-hero img { max-height: 280px; }
+      .listing-hero { max-height: 300px; }
+      .lightbox__nav { display: none; }
     }
   </style>
 </head>
@@ -450,6 +529,15 @@
 
   <!-- Dynamic content inserted here (hidden until loaded) -->
   <div id="listing-content" style="display:none"></div>
+
+  <!-- Photo Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox__close" aria-label="Close">&times;</button>
+    <button class="lightbox__nav lightbox__prev" aria-label="Previous">&lsaquo;</button>
+    <img src="" alt="Property photo" id="lightbox-img">
+    <button class="lightbox__nav lightbox__next" aria-label="Next">&rsaquo;</button>
+    <div class="lightbox__counter" id="lightbox-counter"></div>
+  </div>
 
   <!-- Footer -->
   <footer class="footer">
@@ -661,21 +749,95 @@
         '</div>';
       }
 
-      /** Binds click handlers on gallery thumbnails to swap the hero image. */
+      /** Binds click handlers on gallery thumbnails and lightbox. */
       function bindGalleryHandlers() {
         var thumbs = contentEl.querySelectorAll('.listing-gallery__thumb');
+        var heroEl = contentEl.querySelector('.listing-hero');
         var heroImg = contentEl.querySelector('.listing-hero img');
-        if (!heroImg || !thumbs.length) return;
-        for (var i = 0; i < thumbs.length; i++) {
-          thumbs[i].addEventListener('click', function () {
-            heroImg.src = this.src;
-            for (var j = 0; j < thumbs.length; j++) {
-              thumbs[j].classList.remove('active');
-            }
-            this.classList.add('active');
+
+        /* Thumbnail click swaps hero image */
+        if (heroImg && thumbs.length) {
+          for (var i = 0; i < thumbs.length; i++) {
+            (function (idx) {
+              thumbs[idx].addEventListener('click', function () {
+                heroImg.src = this.src;
+                heroEl.setAttribute('data-photo-index', idx);
+                for (var j = 0; j < thumbs.length; j++) {
+                  thumbs[j].classList.remove('active');
+                }
+                this.classList.add('active');
+              });
+            })(i);
+          }
+        }
+
+        /* Hero click opens lightbox */
+        if (heroEl) {
+          heroEl.addEventListener('click', function () {
+            var idx = parseInt(heroEl.getAttribute('data-photo-index') || '0', 10);
+            openLightbox(idx);
           });
         }
       }
+
+      /* --- Lightbox functionality --- */
+      var lightboxPhotos = [];
+      var lightboxIndex = 0;
+
+      function openLightbox(index) {
+        var lb = document.getElementById('lightbox');
+        var img = document.getElementById('lightbox-img');
+        var counter = document.getElementById('lightbox-counter');
+        if (!lb || !img || lightboxPhotos.length === 0) return;
+
+        lightboxIndex = index;
+        img.src = lightboxPhotos[lightboxIndex];
+        counter.textContent = (lightboxIndex + 1) + ' / ' + lightboxPhotos.length;
+        lb.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeLightbox() {
+        var lb = document.getElementById('lightbox');
+        if (lb) lb.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      function navigateLightbox(direction) {
+        lightboxIndex = (lightboxIndex + direction + lightboxPhotos.length) % lightboxPhotos.length;
+        var img = document.getElementById('lightbox-img');
+        var counter = document.getElementById('lightbox-counter');
+        if (img) img.src = lightboxPhotos[lightboxIndex];
+        if (counter) counter.textContent = (lightboxIndex + 1) + ' / ' + lightboxPhotos.length;
+      }
+
+      /* Lightbox event listeners -- bound once on page load */
+      document.addEventListener('DOMContentLoaded', function () {
+        var lb = document.getElementById('lightbox');
+        if (!lb) return;
+
+        lb.querySelector('.lightbox__close').addEventListener('click', function (e) {
+          e.stopPropagation();
+          closeLightbox();
+        });
+        lb.querySelector('.lightbox__prev').addEventListener('click', function (e) {
+          e.stopPropagation();
+          navigateLightbox(-1);
+        });
+        lb.querySelector('.lightbox__next').addEventListener('click', function (e) {
+          e.stopPropagation();
+          navigateLightbox(1);
+        });
+        lb.addEventListener('click', function (e) {
+          if (e.target === lb) closeLightbox();
+        });
+        document.addEventListener('keydown', function (e) {
+          if (!lb.classList.contains('open')) return;
+          if (e.key === 'Escape') closeLightbox();
+          if (e.key === 'ArrowLeft') navigateLightbox(-1);
+          if (e.key === 'ArrowRight') navigateLightbox(1);
+        });
+      });
 
       /** Renders the full property detail page. */
       function renderProperty(property) {
@@ -689,6 +851,7 @@
 
         var heroImage = getHeroImage(property);
         var allPhotos = getAllPhotos(property);
+        lightboxPhotos = allPhotos.length > 0 ? allPhotos : [heroImage];
         var features = buildBuildingFeatures(property);
         var availableUnits = property.units.filter(function (u) {
           return u.status !== 'Occupied' && u.status !== 'occupied';
@@ -743,22 +906,52 @@
           ? '<p>' + escapeHtml(property.description) + '</p>'
           : '<p>Contact us for more information about this property.</p>';
 
-        /* Desktop table rows */
+        /* Desktop table rows -- show first 5, hide the rest behind "Show More" */
+        var UNITS_PER_PAGE = 5;
         var tableRowsHtml = '';
         for (var k = 0; k < property.units.length; k++) {
-          tableRowsHtml += renderUnitTableRow(property.units[k]);
+          var hiddenClass = k >= UNITS_PER_PAGE ? ' style="display:none" data-extra-unit="true"' : '';
+          tableRowsHtml += renderUnitTableRow(property.units[k]).replace('<tr class="unit-row', '<tr' + hiddenClass + ' class="unit-row');
+          /* Also hide the detail row for hidden units */
+          if (k >= UNITS_PER_PAGE) {
+            tableRowsHtml = tableRowsHtml.replace(
+              /<tr class="unit-detail-row">(?!.*data-extra-unit)/,
+              '<tr class="unit-detail-row" style="display:none" data-extra-unit="true">'
+            );
+          }
         }
 
-        /* Mobile cards */
+        /* Show More button (only if more than UNITS_PER_PAGE) */
+        var showMoreHtml = '';
+        if (property.units.length > UNITS_PER_PAGE) {
+          var remaining = property.units.length - UNITS_PER_PAGE;
+          showMoreHtml = '<div style="text-align:center;margin-top:16px">' +
+            '<button class="btn btn--outline" id="show-more-units" style="font-size:0.78rem;padding:10px 28px">' +
+              'Show ' + remaining + ' More Unit' + (remaining !== 1 ? 's' : '') +
+            '</button></div>';
+        }
+
+        /* Mobile cards -- same pagination */
         var mobileCardsHtml = '';
         for (var mc = 0; mc < property.units.length; mc++) {
-          mobileCardsHtml += renderUnitMobileCard(property.units[mc]);
+          var mHidden = mc >= UNITS_PER_PAGE ? ' style="display:none" data-extra-unit-mobile="true"' : '';
+          mobileCardsHtml += renderUnitMobileCard(property.units[mc]).replace('<div class="unit-mobile-card', '<div' + mHidden + ' class="unit-mobile-card');
+        }
+
+        var showMoreMobileHtml = '';
+        if (property.units.length > UNITS_PER_PAGE) {
+          var remM = property.units.length - UNITS_PER_PAGE;
+          showMoreMobileHtml = '<div style="text-align:center;margin-top:16px">' +
+            '<button class="btn btn--outline" id="show-more-units-mobile" style="font-size:0.78rem;padding:10px 28px">' +
+              'Show ' + remM + ' More Unit' + (remM !== 1 ? 's' : '') +
+            '</button></div>';
         }
 
         contentEl.innerHTML =
-          /* Hero image (compact) */
-          '<div class="listing-hero">' +
+          /* Hero image -- 16:9, click to open lightbox */
+          '<div class="listing-hero" data-photo-index="0">' +
             '<img src="' + escapeHtml(heroImage) + '" alt="' + escapeHtml(property.address) + '">' +
+            '<span class="listing-hero__zoom">Click to enlarge</span>' +
           '</div>' +
           galleryHtml +
 
@@ -799,7 +992,8 @@
                 '<table class="units-table"><thead><tr>' +
                   '<th>Unit</th><th>Beds</th><th>Bath</th><th>Sqft</th><th>Rent</th><th>Available</th><th>Status</th><th></th>' +
                 '</tr></thead><tbody>' + tableRowsHtml + '</tbody></table>' +
-                '<div class="units-mobile">' + mobileCardsHtml + '</div>' +
+                showMoreHtml +
+                '<div class="units-mobile">' + mobileCardsHtml + showMoreMobileHtml + '</div>' +
               '</div>' +
             '</div>' +
           '</div>';
@@ -809,7 +1003,7 @@
         triggerRevealAnimations();
       }
 
-      /** Binds click handlers on table rows and mobile cards to toggle detail expansion. */
+      /** Binds click handlers on table rows, mobile cards, and Show More buttons. */
       function bindUnitExpansion() {
         /* Desktop table rows */
         var rows = contentEl.querySelectorAll('.unit-row');
@@ -824,6 +1018,30 @@
         for (var j = 0; j < cards.length; j++) {
           cards[j].addEventListener('click', function () {
             this.classList.toggle('unit-mobile-card--expanded');
+          });
+        }
+
+        /* Show More button -- desktop */
+        var showMoreBtn = document.getElementById('show-more-units');
+        if (showMoreBtn) {
+          showMoreBtn.addEventListener('click', function () {
+            var hidden = contentEl.querySelectorAll('[data-extra-unit]');
+            for (var h = 0; h < hidden.length; h++) {
+              hidden[h].style.display = '';
+            }
+            showMoreBtn.parentElement.style.display = 'none';
+          });
+        }
+
+        /* Show More button -- mobile */
+        var showMoreMobile = document.getElementById('show-more-units-mobile');
+        if (showMoreMobile) {
+          showMoreMobile.addEventListener('click', function () {
+            var hidden = contentEl.querySelectorAll('[data-extra-unit-mobile]');
+            for (var h = 0; h < hidden.length; h++) {
+              hidden[h].style.display = '';
+            }
+            showMoreMobile.parentElement.style.display = 'none';
           });
         }
       }
