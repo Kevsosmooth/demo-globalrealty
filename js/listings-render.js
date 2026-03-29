@@ -156,26 +156,110 @@
     '</' + tag + '>';
   }
 
+  var PER_PAGE = 9;
+  var allProperties = [];
+  var filteredProperties = [];
+  var currentPage = 1;
+  var currentFilter = 'all';
+  var paginationEl = document.getElementById('pagination');
+
   /**
-   * Renders all property cards into the grid and sets up filters.
+   * Filters properties by the active filter, then renders the current page.
    */
-  function renderAll(properties) {
+  function applyFilterAndRender() {
+    filteredProperties = allProperties.filter(function (p) {
+      if (currentFilter === 'all') return true;
+      if (currentFilter === 'available') return p.available_count > 0;
+      if (currentFilter === 'rented') return p.available_count === 0;
+      var cats = getBedroomCategories(p).split(' ');
+      return cats.indexOf(currentFilter) !== -1;
+    });
+
+    var totalPages = Math.max(1, Math.ceil(filteredProperties.length / PER_PAGE));
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    var start = (currentPage - 1) * PER_PAGE;
+    var pageItems = filteredProperties.slice(start, start + PER_PAGE);
+
     var html = '';
-    for (var i = 0; i < properties.length; i++) {
-      html += renderCard(properties[i], i);
+    for (var i = 0; i < pageItems.length; i++) {
+      html += renderCard(pageItems[i], start + i);
     }
     grid.innerHTML = html;
-    if (countEl) countEl.textContent = properties.length;
-    /* Fade in the count text now that data is loaded */
+
+    if (countEl) countEl.textContent = filteredProperties.length;
     var countWrap = document.getElementById('listings-count-wrap');
     if (countWrap) countWrap.style.opacity = '1';
-    setupFilters();
+
+    renderPagination(totalPages);
     triggerRevealAnimations();
   }
 
   /**
-   * Reattaches the IntersectionObserver for newly rendered cards
-   * so scroll-reveal animations work on dynamically inserted elements.
+   * Renders pagination controls: Prev, page numbers, Next.
+   * Shows ellipsis for large page counts.
+   */
+  function renderPagination(totalPages) {
+    if (!paginationEl || totalPages <= 1) {
+      if (paginationEl) paginationEl.innerHTML = '';
+      return;
+    }
+
+    var html = '<button class="pagination__btn" data-page="prev"' +
+      (currentPage === 1 ? ' disabled' : '') + '>&larr; Prev</button>';
+
+    var pages = buildPageNumbers(currentPage, totalPages);
+    for (var i = 0; i < pages.length; i++) {
+      if (pages[i] === '...') {
+        html += '<span class="pagination__ellipsis">...</span>';
+      } else {
+        var active = pages[i] === currentPage ? ' active' : '';
+        html += '<button class="pagination__btn' + active + '" data-page="' + pages[i] + '">' + pages[i] + '</button>';
+      }
+    }
+
+    html += '<button class="pagination__btn" data-page="next"' +
+      (currentPage === totalPages ? ' disabled' : '') + '>Next &rarr;</button>';
+
+    paginationEl.innerHTML = html;
+
+    /* Bind page button clicks */
+    var btns = paginationEl.querySelectorAll('.pagination__btn');
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].addEventListener('click', function () {
+        var page = this.dataset.page;
+        if (page === 'prev') currentPage--;
+        else if (page === 'next') currentPage++;
+        else currentPage = parseInt(page, 10);
+        applyFilterAndRender();
+        /* Scroll to top of listings */
+        grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  }
+
+  /**
+   * Builds an array of page numbers with ellipsis for large sets.
+   * Example: [1, 2, 3, '...', 8] or [1, '...', 4, 5, 6, '...', 10]
+   */
+  function buildPageNumbers(current, total) {
+    if (total <= 7) {
+      var all = [];
+      for (var i = 1; i <= total; i++) all.push(i);
+      return all;
+    }
+    var pages = [1];
+    if (current > 3) pages.push('...');
+    var start = Math.max(2, current - 1);
+    var end = Math.min(total - 1, current + 1);
+    for (var p = start; p <= end; p++) pages.push(p);
+    if (current < total - 2) pages.push('...');
+    pages.push(total);
+    return pages;
+  }
+
+  /**
+   * Reattaches the IntersectionObserver for newly rendered cards.
    */
   function triggerRevealAnimations() {
     var els = grid.querySelectorAll('.reveal');
@@ -194,42 +278,28 @@
   }
 
   /**
-   * Wires up the filter bar buttons to show/hide cards.
-   * Matches against data-bedrooms (space-separated) and data-status.
+   * Sets up filter buttons to filter properties and reset to page 1.
    */
   function setupFilters() {
     var buttons = document.querySelectorAll('.filter-btn');
-    var cards = grid.querySelectorAll('.property-card');
-
     buttons.forEach(function (btn) {
       btn.addEventListener('click', function () {
         buttons.forEach(function (b) { b.classList.remove('active'); });
         btn.classList.add('active');
-
-        var filter = btn.dataset.filter;
-        var visible = 0;
-
-        cards.forEach(function (card) {
-          var bedrooms = card.dataset.bedrooms || '';
-          var status = card.dataset.status;
-          var show = false;
-
-          if (filter === 'all') {
-            show = true;
-          } else if (filter === 'available' || filter === 'rented') {
-            show = status === filter;
-          } else {
-            /* Check if the card's bedroom categories include this filter */
-            show = bedrooms.split(' ').indexOf(filter) !== -1;
-          }
-
-          card.style.display = show ? '' : 'none';
-          if (show) visible++;
-        });
-
-        if (countEl) countEl.textContent = visible;
+        currentFilter = btn.dataset.filter;
+        currentPage = 1;
+        applyFilterAndRender();
       });
     });
+  }
+
+  /**
+   * Entry point -- stores full dataset, sets up filters, renders first page.
+   */
+  function renderAll(properties) {
+    allProperties = properties;
+    setupFilters();
+    applyFilterAndRender();
   }
 
   /**
